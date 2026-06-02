@@ -1,9 +1,21 @@
-
-import './App.css'
+import { useState } from 'react'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import Signup from "./Signup.tsx"
+import Login from "./Login.tsx"
+import Home from "./Home.tsx"
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
+
   return(
-    <h1>Hello</h1>
+  <BrowserRouter>
+  <Routes>
+    <Route path='/register' element= {<Signup/>}></Route>
+    <Route path='/login' element= {<Login/>}></Route>
+     <Route path='/home' element= {<Home/>}></Route>
+  
+  </Routes>
+  </BrowserRouter>
   )
 }
 
