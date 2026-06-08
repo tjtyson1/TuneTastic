@@ -19,11 +19,11 @@ function Login(){
         .catch(err=> console.log(err))
     }
      return(
-        <div className=" d-flex justify-content-center align-items-center bg-secondary vh-100">
-            <div className="bg-white p-3 rounded w-25">
-                <h2>Login</h2>
+        <div className=" flex justify-center items-center bg-gray-500 h-screen">
+            <div className="bg-white p-4 rounded w-1/4">
+                <h2 className="text-3xl">Login</h2>
                  <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
+                    <div className="mb-4">
                         <label htmlFor="email">
                             <strong>Email</strong>
                         </label>
@@ -32,11 +32,11 @@ function Login(){
                         placeholder="Enter Email"
                         autoComplete="off"
                         name="email"
-                        className="form-control rounded-1"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onChange={(e) => setEmail(e.target.value)}  
                         />
                     </div>
-                    <div className="mb-3">
+                    <div className="mb-4">
                         <label htmlFor="email">
                             <strong>Password</strong>
                         </label>
@@ -45,16 +45,17 @@ function Login(){
                         placeholder="Enter Password"
                         autoComplete="off"
                         name="email"
-                        className="form-control rounded-1" 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" 
                          onChange={(e) => setPassword(e.target.value)}  
                         />
                     <br />
-                    <button type="submit" className="btn btn-success w-100 rounded-1"> Login</button>
+                    <button type="submit" className="px-4 py-2 bg-green-700 w-full rounded-md text-white hover:bg-green-900"> Login</button>
                     
                 </div>
             </form>
                 <p> Don't Have an Account?</p>
-                <Link to="/Register" className="btn btn-default border w-100 bg-light rounded-1 text-decoration-none">
+                <br />
+                <Link to="/Register" className="block text-center px-4 py-2 bg-gray-200 w-full rounded-md text-white hover:bg-gray-400">
                     Sign Up
                     </Link>
             </div>

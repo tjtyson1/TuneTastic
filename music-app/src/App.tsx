@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import 'bootstrap/dist/css/bootstrap.min.css'
+import './index.css'
 import Signup from "./Signup.tsx"
 import Login from "./Login.tsx"
 import Home from "./Home.tsx"
