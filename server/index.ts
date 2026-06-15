@@ -4,9 +4,12 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 const UserModel = require('./models/User')
 const app = express()
+const musicRoutes = require("./routes/musicRoutes");
+
+
 app.use(express.json())
 app.use(cors())
-
+app.use("/api/music", musicRoutes);
 mongoose.connect("mongodb://127.0.0.1:27017/user")
 
 mongoose.connection.on('connected', () => {
@@ -39,6 +42,9 @@ app.post('/register', (req, res) => {
     .then(users => res.json(users))
     .catch(err => res.json(err))
 })
-app.listen(3001, () => {
-    console.log("server is running")
+
+const PORT = 3001
+
+app.listen(PORT, () => {
+    console.log(`server is running on port ${PORT}`)
 })
