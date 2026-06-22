@@ -2,13 +2,12 @@ import React, {useState} from 'react'
 
 function Home(){
     
-    const [songs, setSongs] = useState(["song1"]);
+    const [songs, setSongs] = useState([]);
 
     //for(let i =0; i<songs.length; i++){updateSongs}
-    function handleAddSong(){
+    function handleAddSong(song){
         const newSong = document.getElementById("songInput").value;
-        document.getElementById("songInput").value = "";
-        setSongs(s => [ ...s, {songTitle: newSongTitle,
+         setSongs(s => [ ...s, {songTitle: newSongTitle,
                                artist: newArtist,
                                album: newAlbum,
                                songCover: newSongCover,

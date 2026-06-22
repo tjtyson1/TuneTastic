@@ -4,6 +4,7 @@ import Signup from "./Signup.jsx"
 import Login from "./Login.jsx"
 import Home from "./Home.jsx"
 import Search from "./Search.jsx"
+import AudioPlayer from './components/AudioPlayer.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 
@@ -17,6 +18,7 @@ function App() {
     <Route path='/login' element= {<Login/>}></Route>
     <Route path='/library' element= {<Home/>}></Route>
     <Route path='/search' element= {<Search/>}></Route>
+    <Route path='/audio' element= {<AudioPlayer/>}></Route>
   </Routes>
   </BrowserRouter>
   )
