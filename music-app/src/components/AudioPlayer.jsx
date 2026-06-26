@@ -7,7 +7,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 
-function AudioPlayer({streamUrl, songTitle, artists, songCover}){
+function AudioPlayer({streamUrl, songTitle, artists, songCover, nextSong, previousSong}){
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -20,14 +20,17 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover}){
 
         if(!streamUrl) return;
 
-        const audio = audioRef.current;
-
+        
         async function loadSong(){
-
+            const audio = audioRef.current;
             try{
                 
                 audio.src = streamUrl;
-                audio.play();
+
+                setCurrentTime(0);
+                setDuration(0);
+
+                await audio.play();
                 setIsPlaying(true);
 
                 audio.onloadedmetadata = () => {
@@ -44,6 +47,24 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover}){
        
 
     }, [streamUrl]);
+
+
+    useEffect(() =>{
+
+          const audio = audioRef.current;
+        const handleEnded = () => {
+            if (nextSong){
+                nextSong();
+            }
+            
+        };
+
+        audio.addEventListener("ended", handleEnded);
+
+        return () => {
+            audio.removeEventListener("ended", handleEnded);
+        };
+    }, [nextSong]);
 
     //track progress
     useEffect(()=>{
@@ -114,11 +135,16 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover}){
 
             <span>{formatTime(duration)}</span>
             
-
+            <button onClick={previousSong} className="text-xl hover:cursor-pointer">
+                <FontAwesomeIcon icon="fa-solid fa-backward-step" />
+            </button>
             <button onClick={handlePlayPause} className="text-xl hover:cursor-pointer">
                     {isPlaying ? <FontAwesomeIcon icon="fa-solid fa-pause" /> : <FontAwesomeIcon icon="fa-solid fa-play" />}
             </button>  
             
+            <button onClick={nextSong} className="text-xl hover:cursor-pointer">
+                <FontAwesomeIcon icon="fa-solid fa-forward-step" />
+            </button>
             <FontAwesomeIcon icon="fa-solid fa-volume" />
             <input
                 type="range"

@@ -49,8 +49,25 @@ async function getAlbum(req, res){
         });
     }
 }
+
+async function getArtist(req, res){
+
+    try{
+        const browseId = req.params.id;
+
+        const album =
+            await veromeService.getArtist(browseId)
+        res.json(album)
+    }catch(error){
+        console.error(error);
+        res.status(500).json({
+            message: "Search failed"
+        });
+    }
+}
 module.exports ={
     searchSongs,
     streamSongs,
-    getAlbum
+    getAlbum,
+    getArtist,
 }

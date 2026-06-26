@@ -23,8 +23,16 @@ async function getAlbum(browseId){
     );
     return response.data;
 }
+
+async function getArtist(browseId){
+    const response = await axios.get(
+        `${VEROME_URL}/api/artists/${browseId}`
+    )
+    return response.data
+}
 module.exports = {
     searchSongs,
     streamSongs,
     getAlbum,
+    getArtist,
 };
