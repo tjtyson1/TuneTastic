@@ -1,4 +1,6 @@
 const veromeService = require("../services/verome");
+const {resolveStreamUrl} = require("../services/resolver")
+
 
 async function searchSongs(req, res) {
 
@@ -20,19 +22,34 @@ async function searchSongs(req, res) {
 
 async function streamSongs(req, res){
 
-    try{
-        const streamId = req.query.id;
+    try {
+        const { id } = req.query;
 
-        const songs = 
-            await veromeService.streamSongs(streamId);
-        res.json(songs)
-    }catch(error){
-        console.error(error);
-        res.status(500).json({
-            message: "Search failed"
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                error: "Missing video id"
+            });
+        }
+
+        const streamUrl = await resolveStreamUrl(id);
+
+        return res.json({
+            success: true,
+            streamingUrls: [
+                { url: streamUrl }
+            ]
+        });
+
+    } catch (err) {
+        console.error(err);
+
+        return res.status(500).json({
+            success: false,
+            error: err.message
         });
     }
-}
+};
 
 async function getAlbum(req, res){
 

@@ -1,26 +1,110 @@
-import { useState } from 'react'
+
 import './index.css'
 import Signup from "./Signup.jsx"
 import Login from "./Login.jsx"
-import Home from "./Home.jsx"
+import Library from "./Library.jsx"
 import Search from "./Search.jsx"
 import AudioPlayer from './components/AudioPlayer.jsx'
+import AlbumPage from './components/AlbumPage.jsx'
+import ArtistPage from './components/ArtistPage.jsx'
+import SearchPageResults from './components/SearchPageResults.jsx'
+import Navbar from './components/Navbar.jsx'
+import { PlayerProvider } from './context/PlayerContext.jsx'
+import { usePlayer } from './context/PlayerContext.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 
+import albumPlaceHolder from "./assets/albumPlaceHolder.png"
+
+import axios from "axios";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+
+
+library.add(fas, far, fab)
+
 
 function App() {
-
+  const [search,setSearch] = useState("")
+      const [result,setResults] = useState([])
+      const [filter,setFilter] = useState("songs")
+      
+      const [currentView, setCurrentView] = useState("search");
+     
+      const {
+        streamUrl,
+        currentSong,
+        nextSong,
+        previousSong
+      } = usePlayer()
+      
+      
+      
+      
+      const handleWheel = (e) => {
+      e.currentTarget.scrollLeft += e.deltaY;
+  };
+  
+      async function handleSearch(e){
+          if (!search.trim()) return;
+          e.preventDefault();
+          console.log(`Searching for: ${search} filter: ${filter}`)
+          
+          if (filter == undefined){
+              filter = ""
+          }
+          const response = await axios.get(
+                  `http://localhost:3001/api/music/search?q=${search}&filter=${filter}`
+  
+          );
+          setCurrentView("search")
+          setResults(response.data.results)
+          console.log(response)
+      }
+  
+  
+  
+  
+         
+         
+  
+   
+     
+  
   return(
-  <BrowserRouter>
-  <Routes>
-    <Route path='/register' element= {<Signup/>}></Route>
-    <Route path='/login' element= {<Login/>}></Route>
-    <Route path='/library' element= {<Home/>}></Route>
-    <Route path='/search' element= {<Search/>}></Route>
-    <Route path='/audio' element= {<AudioPlayer/>}></Route>
-  </Routes>
-  </BrowserRouter>
+    <>
+     
+          <Navbar/>
+      
+          <Routes>
+              <Route path='/register' element= {<Signup/>}></Route>
+              <Route path='/login' element= {<Login/>}></Route>
+              <Route path='/library' element= {<Library/>}></Route>
+              <Route path='/search' element= {<Search/>}></Route>
+              <Route path='/audio' element= {<AudioPlayer/>}></Route>
+              <Route path='/artist/:id' element={<ArtistPage/>}></Route>
+              <Route path='/album/:id' element={<AlbumPage/>}></Route>
+          </Routes>
+
+        
+  
+   
+
+
+   <AudioPlayer 
+      streamUrl={streamUrl}
+      songTitle={currentSong?.title}
+      artists={currentSong?.artists}
+      songCover={currentSong?.thumbnails?.[0]?.url || currentSong?.thumbnail || albumPlaceHolder}
+      nextSong={nextSong}
+      previousSong={previousSong}
+    />
+    </>
+
   )
 }
 

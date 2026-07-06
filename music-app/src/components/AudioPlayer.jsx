@@ -6,72 +6,77 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
-
-function AudioPlayer({streamUrl, songTitle, artists, songCover, nextSong, previousSong}){
+import { usePlayer } from "../context/PlayerContext";
+function AudioPlayer({songCover, songTitle, artists, streamUrl}){
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
     const audioRef = useRef(null);
-
+    const { shuffle, toggleShuffle,  nextSong, previousSong, currentSong } = usePlayer();
     //Load new song
     useEffect(() =>{
 
         if(!streamUrl) return;
 
         
-        async function loadSong(){
+       
             const audio = audioRef.current;
-            try{
-                
+           if (!audio || !streamUrl) return;
+           
+                audio.pause();
                 audio.src = streamUrl;
-
+                audio.load();
+               
                 setCurrentTime(0);
                 setDuration(0);
 
-                await audio.play();
-                setIsPlaying(true);
-
-                audio.onloadedmetadata = () => {
-                    setDuration(audio.duration);
+                const playPromise = audio.play()
+                
+                if (playPromise !== undefined){
+                    playPromise.catch(err => {
+                        console.error("Playback failed;", err);
+                    });
                 }
-            }
-            catch (error){
-            
-            console.error("Playback failed:", error)
-            
-        } 
-        }
-        loadSong();
-       
-
+                
+                const onLoaded = () => setDuration(audio.duration);
+                audio.addEventListener("loadedmetadata", onLoaded)
+               
+                return() => {
+                    audio.removeEventListener("loadedmetadata", onLoaded)   
+                };
     }, [streamUrl]);
 
-
     useEffect(() =>{
+        const audio = audioRef.current;
+        if(!audio) return;
+    
+        const onPlay = () => setIsPlaying(true);
+        const onPause = () => setIsPlaying(false);
+        const onEnded = () => nextSong?.();
 
-          const audio = audioRef.current;
-        const handleEnded = () => {
-            if (nextSong){
-                nextSong();
-            }
-            
+        audio.addEventListener("play", onPlay);
+        audio.addEventListener("pause", onPause);
+        audio.addEventListener("ended", onEnded);
+
+        return() => {
+            audio.removeEventListener("play", onPlay);
+            audio.removeEventListener("pause", onPause);
+            audio.removeEventListener("ended", onEnded);
         };
-
-        audio.addEventListener("ended", handleEnded);
-
-        return () => {
-            audio.removeEventListener("ended", handleEnded);
-        };
-    }, [nextSong]);
-
+    }, []);
+    
     //track progress
     useEffect(()=>{
 
         const audio = audioRef.current;
 
-        const update = () => setCurrentTime(audio.currentTime);
+        const update = () => {
+            if (!audio) return
+             setCurrentTime(audio.currentTime);
+        };
+       
 
         audio.addEventListener("timeupdate",update);
 
@@ -87,19 +92,25 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover, nextSong, previo
     const handlePlayPause = () => {
 
         const audio = audioRef.current;
+        if (!audio) return
 
         if (isPlaying){
             audio.pause();
-            setIsPlaying(false);
+            
         } else{
             audio.play();
-            setIsPlaying(true);
+            
         }
-    }
+    };
+        useEffect(() => {
+            if (audioRef.current) {
+                audioRef.current.volume = volume;
+            }
+        }, [volume]);
+        const handleVolume = (e) =>{
 
-    const handleVolume = (e) => {
-
-        const audio = audioRef.current;
+             const audio = audioRef.current;
+             if (!audio) return
 
         const newVolume = Number(e.target.value);
 
@@ -117,7 +128,12 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover, nextSong, previo
     }
     return(
         <div className="fixed bottom-0 left-0 w-full bg-gray-600 text-white flex items-center justify-between px-4 py-3 ">
-           <img loading="lazy" src={songCover} alt="" onError={(e) =>{e.target.onerror = null; e.target.src = "/assets/albumPlaceHolder.png"}}/>
+           <img 
+           className="rounded"
+           loading="lazy"
+            src={songCover} 
+           alt="" 
+           onError={(e) =>{e.target.onerror = null; e.target.src = "/assets/albumPlaceHolder.png"}}/>
 
             <div className="w-1/3">
                 <p className="text-sm">{songTitle || "No song selected"}</p>
@@ -129,7 +145,7 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover, nextSong, previo
                 className="w-full h-2 bg-blue-500 accent-yellow-300"
                 type="range"
                 min="0"
-                max={duration}
+                max={Number.isFinite(duration) ? duration : 0}
                 value={currentTime}
                 onChange={handleSeek}/>
 
@@ -145,6 +161,10 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover, nextSong, previo
             <button onClick={nextSong} className="text-xl hover:cursor-pointer">
                 <FontAwesomeIcon icon="fa-solid fa-forward-step" />
             </button>
+
+            <button onClick={toggleShuffle} className={`text-xl hover:cursor-pointer ${shuffle ? "text-primary" : "" }`}>
+                <FontAwesomeIcon icon="fa-solid fa-shuffle" /> 
+            </button>
             <FontAwesomeIcon icon="fa-solid fa-volume" />
             <input
                 type="range"
@@ -156,13 +176,13 @@ function AudioPlayer({streamUrl, songTitle, artists, songCover, nextSong, previo
 />
             <div className="w-1/3 text-right text-xs">LOGO</div>
 
-            <audio ref={audioRef} />
+            <audio ref={audioRef} onEnded={nextSong}/>
               
         </div>
 
         
     );
-};
+}
 
 
 export default AudioPlayer 

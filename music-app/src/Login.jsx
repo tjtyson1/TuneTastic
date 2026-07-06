@@ -11,8 +11,15 @@ function Login(){
         e.preventDefault()
         axios.post('http://localhost:3001/login', {email, password})
         .then(result => {console.log(result)
-            if (result.data === "Success") {
-                navigate('/library')
+            if (result.data.success) {
+                console.log(result.data.user); 
+                
+                localStorage.setItem("user", JSON.stringify(result.data.user));
+
+                navigate('/search')
+                
+            }else{
+                console.error("Login failed")
             }
         
         })
