@@ -21,6 +21,18 @@ const SongSchema = new mongoose.Schema({
 
 }, {_id: false});
 
+const PlaylistSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true    
+    },
+    songs: [SongSchema],
+
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
 const LibrarySchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -31,6 +43,7 @@ const LibrarySchema = new mongoose.Schema({
 
   likedSongs: [SongSchema],
   likedAlbums: [AlbumSchema],
+  playlists: [PlaylistSchema],
   recentlyPlayed: [SongSchema]
 }, {
     timestamps: true

@@ -9,11 +9,11 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
-
-export default function SearchPageResults({currentView, result = [], filter, playSong, getArtist, getAlbum}){
+import Dropdown from "./Dropdown";
+export default function SearchPageResults({currentView, result = [], filter,}){
     
     const { id } = useParams();
-    const {addSongToLibrary} = usePlayer()
+    const {addSongToLibrary, setShowDropdown, playSong, getArtist, getAlbum, setOpenMenu, openMenu} = usePlayer()
     if (currentView !== "search") return null;
 
 // optional helper (move to utils later)
@@ -32,21 +32,26 @@ export default function SearchPageResults({currentView, result = [], filter, pla
             }
                     {/* Song search*/}
                       { filter=="songs" &&
-                          <div className=" grid grid-cols-5 sm:grid-cols-2 px-4 py-2 gap-4 mb-[85px]"> 
+                          <div className=" grid xl:grid-cols-5 lg:grid-cols-3  md:grid-cols-2 px-4 py-2 gap-4 mb-[85px]"> 
                               {result.slice(0,20).map((song) => (
                                   <div key={song.videoId} onClick={() => {playSong(song, result)}} className=" flex p-4 justify-center overflow-hide rounded-lg  bg-gray-200 hover:bg-gray-100 active:bg-gray-300">  
                                   <div className=" flex-shrink-0 grid p-2 justify-center m-auto w-64 rounded-lg hover:bg-gray-100">
                                      <img loading="lazy" decoding="async" src={upscaleImage(song.thumbnails[0].url, 120)} alt="" className="m-auto justify-center rounded w-30 h-30 aspect-square object-cover" onError={(e) =>{e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
                                       <h2 className=" text-left font-semibold line-clamp-3 mt-2 h-12 ">{song.title}</h2>
                                       <p className="text-left h-6">{song.artists.map(artist => artist.name).join(", ")}</p>
-                                    <div>
+                                    <div className="flex justify-end relative ">
                                         <button onClick={(e) => {
                                             e.stopPropagation();
                                             addSongToLibrary(song);
                                             }}>
                                          <FontAwesomeIcon icon="fa-solid fa-plus" />
-                                         add to library
+                                        
                                       </button>
+                                        <button onClick={() => {setOpenMenu(openMenu === song.videoId ? null : song.videoId)}} 
+                                            className="hover:gray-200 hover:cursor-pointer px-4 py-2"> 
+                                                <FontAwesomeIcon icon="fa-solid fa-ellipsis" /></button>
+                                                <Dropdown
+                                                song={song}/>
                                     </div>
                                   </div>
                                      

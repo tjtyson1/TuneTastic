@@ -1,6 +1,7 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect} from "react";
 import axios from "axios";
 import albumPlaceHolder from "../assets/albumPlaceHolder.png";
+
 
 const PlayerContext = createContext();
 
@@ -12,15 +13,57 @@ export function PlayerProvider({children}){
     const [currentIndex, setCurrentIndex] = useState(0)    
     const [shuffle, setShuffle] = useState(false)
     const [history, setHistory] = useState([])
-
+    const [isVisible, setVisible] = useState(false)
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [openMenu, setOpenMenu] = useState(null);
     const [library, setLibrary] = useState({
             likedSongs: [],
             likedAlbums: [],
+            playlists: [],
             recentlyPlayed: [],
         }) 
+    const [playlistName, setPlaylistName] = useState("")
 
     const currentUser = JSON.parse(localStorage.getItem("user"));
-    
+    console.log(currentSong)
+    useEffect(() => {
+    if (currentSong) {
+        localStorage.setItem(
+            "currentSong",
+            JSON.stringify(currentSong)
+        );
+    }
+}, [currentSong]);
+
+    useEffect(() =>{
+        localStorage.setItem("history", JSON.stringify(history))
+    },[history]);
+
+     useEffect(() => {
+    localStorage.setItem("queue", JSON.stringify(queue));
+    }, [queue]);
+
+    useEffect(() => {
+    const savedQueue = JSON.parse(localStorage.getItem("queue"));
+
+    if (savedQueue) {
+        setQueue(savedQueue);
+    }
+    }, []);
+
+    useEffect(() => {
+    const savedSong = JSON.parse(localStorage.getItem("currentSong"));
+
+    if (savedSong) {
+        setCurrentSong(savedSong);
+    }
+}, []);
+
+useEffect(() => {
+    loadLibrary();
+}, []);
+
+
      async function playAlbum(album, index = 0, shuffle = false) {
             if (!album || !album.tracks?.length) {
         console.warn("Invalid album passed to playAlbum:", album);
@@ -28,16 +71,16 @@ export function PlayerProvider({children}){
     }
         
         setCurrentAlbum(album)
-        console.log(currentAlbum.tracks.length)
+        console.log(album?.tracks?.length)
         
-        const albumTracks = currentAlbum?.tracks?.map(track => ({...track, thumbnails: [{url: upscaleImage(currentAlbum?.album?.thumbnail,60)}] }))
+        const albumTracks = album?.tracks?.map(track => ({...track, thumbnails: [{url: upscaleImage(album?.album?.thumbnail,60)}] }))
         const playlist = shuffle ? shuffleSongs([...albumTracks]) : albumTracks 
             
         
         setQueue(playlist);
         console.log(queue)
         setCurrentIndex(index);
-        await playSong(playlist[index]);
+        await playSong(playlist[index], playlist);
     }
 
     function upscaleImage(url, size) {
@@ -45,10 +88,11 @@ export function PlayerProvider({children}){
               return url.replace(/w\d+-h\d+/, `w${size}-h${size}`);
           }
 
-     async function playSong(song, songList = []){
-            if (currentSong){
-                setHistory(prev => [...prev, currentSong]);
-              }
+     async function playSong(song, songList = [], addToHistory = true){
+        if (currentSong?.videoId === song.videoId) {
+            return;
+        }
+
 
               setCurrentSong(song);
               console.log(currentSong)
@@ -102,7 +146,17 @@ export function PlayerProvider({children}){
 
      function nextSong(){
         if(queue.length ===0) return
-
+        
+         if (currentSong){
+                setHistory(prev => {
+                    const last = prev[prev.length - 1];
+                    const updated = [...prev, currentSong]
+                    if (last?.videoId === currentSong.videoId){
+                        return prev;
+                    }
+                return updated.slice(-50)
+                });
+              }
         let next;
         if(shuffle){
             let randomIndex;
@@ -124,7 +178,7 @@ export function PlayerProvider({children}){
               }
       
           }
-          playSong(next);
+          playSong(next, queue);
         }
       
           function previousSong(){
@@ -141,7 +195,7 @@ export function PlayerProvider({children}){
                if (index !==-1 ){
                 setCurrentIndex(index)
                }
-                  playSong(lastSong);
+                  playSong(lastSong, queue, false);
               
           }
 
@@ -180,7 +234,25 @@ export function PlayerProvider({children}){
                     videoId: song.videoId,
                     title: song.title,
                     artists: song.artists,
-                    thumbnail: song.thumbnails?.[0]?.url
+                    thumbnail: song.thumbnails?.[0]?.url || song?.thumbnail
+                }
+            });
+            
+
+            console.log("Song added!");
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    async function addAlbumToLibrary(album) {
+        try {
+            await axios.post("http://localhost:3001/api/library/album", {
+                userId: currentUser._id,
+                album: {
+                    browseId: album?.album?.browseId,
+                    title: album?.album?.title,
+                    artists: album?.artists?.name,
+                    thumbnail: album?.album?.thumbnail
                 }
             });
             
@@ -213,7 +285,89 @@ export function PlayerProvider({children}){
             console.error(err);
         }
     }
+     async function removeAlbumFromLibrary(browseId) {
+        try {
+            await axios.delete("http://localhost:3001/api/library/album", {
+                data:{
+                    userId: currentUser._id,
+                    browseId
+                }
+            });
+            
 
+            console.log("Song removed");
+            setLibrary(prev => ({
+                ...prev,
+                likedAlbums: prev.likedAlbums.filter(
+                    album => album.browseId !== browseId
+                )
+            }))
+            // loadLibrary()
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function addPlaylist(name){
+        try {
+            const response = await axios.post("http://localhost:3001/api/library/playlist", {
+                userId: currentUser._id,
+                name
+                
+            });
+            console.log("playlist added");
+
+            setLibrary(response.data)
+            
+        }catch(error){
+            console.error(error)
+        }
+        
+    }
+    async function removePlaylist(playlistId){
+        try {
+             await axios.delete("http://localhost:3001/api/library/playlist", {
+                data:{
+                     userId: currentUser._id,
+                    playlistId
+                }
+            });
+            
+
+             setLibrary(prev => ({
+                ...prev,
+                playlists: prev.playlists.filter(
+                    p => p._id !== playlistId
+                )
+            }))
+            console.log("playlist removed");
+            
+        }catch(error){
+            console.error(error)
+        }
+        
+    }
+
+    async function addSongToPlaylist(song, playlistId){
+        try {
+            await axios.post("http://localhost:3001/api/library/playlist/song", {
+                userId: currentUser._id,
+                playlistId,
+                song: {
+                    videoId: song.videoId,
+                    title: song.title,
+                    artists: song.artists,
+                    thumbnail: song.thumbnails?.[0]?.url || song?.thumbnail
+                }
+            });
+            
+
+            console.log("Song added!");
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    
 
 
           return(
@@ -227,6 +381,7 @@ export function PlayerProvider({children}){
                     currentSong,
                     currentAlbum,
                     queue,
+                    history,
                     currentIndex,
                     upscaleImage,
                     shuffle, 
@@ -234,14 +389,28 @@ export function PlayerProvider({children}){
                     library,
                     loadLibrary,
                     addSongToLibrary,
-                    removeSongFromLibrary
+                    removeSongFromLibrary,
+                    addAlbumToLibrary,
+                    removeAlbumFromLibrary,
+                    setVisible,
+                    isVisible,
+                    addPlaylist,
+                    playlistName,
+                    setPlaylistName,
+                    removePlaylist, 
+                    addSongToPlaylist,
+                    setShowDropdown,
+                    showDropdown,
+                    openMenu,
+                    setOpenMenu
+
                 }}
                 >
                     {children}
             </PlayerContext.Provider>
           )
-      
 }
+
 
 export function usePlayer(){
     return useContext(PlayerContext);

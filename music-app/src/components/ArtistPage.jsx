@@ -39,18 +39,7 @@ export default function ArtistPage({}){
     return(
         <div
         className="bg-gray-300 min-h-screen ">
-              <nav className="bg-primary text-white ">
-                <div className="h-16 flex justify-around items-center sm:overflow-hidden ">
-                    <div className="text-3xl font-bold px-4">LOGO</div>
-                    <div className=" flex w-full justify-around items-center">
-                        <a href="/library" className="text-xl px-4  border rounded-full bg-secondary hover:bg-yellow-600 flex items-center hover:scale-105 ">LIBRARY</a>
-                        <a href="#" className="text-xl px-4 border rounded-full flex items-center bg-secondary-dark hover:bg-yellow-600 hover:scale-105">PLAYLIST</a>
-                        <a href="/search" className="text-xl px-4 border rounded-full flex items-center bg-yellow-500 hover:bg-yellow-600 hover:scale-105">SEARCH</a>
-                        <a href="#" className="text-xl px-4 border rounded-full flex items-center bg-yellow-300 hover:bg-yellow-600 hover:scale-105">SETTINGS</a>
-                        <a href="#" className="text-xl px-4 border rounded-full flex items-center bg-yellow-300 hover:bg-yellow-600 hover:scale-105">LOG IN/SIGN UP</a>
-                    </div>
-                </div>
-            </nav>
+              
             {/* Artist page */}
                     { 
                     

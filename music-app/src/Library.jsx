@@ -9,11 +9,12 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 import { usePlayer } from './context/PlayerContext';
 import Songlist from './components/SongList';
 function Library(){
-    const {library, loadLibrary, removeSongFromLibrary, playSong} = usePlayer()
+    const {library, loadLibrary, removeSongFromLibrary, playSong, upscaleImage, removeAlbumFromLibrary, queue} = usePlayer()
     const [songs, setSongs] = useState([]);
     
     const currentUser = JSON.parse(localStorage.getItem("user"));
     console.log(currentUser)
+    console.log("queue: ", queue)
     useEffect(() => {
         loadLibrary();
     }, []);
@@ -32,7 +33,14 @@ function Library(){
     return(
         <div className='bg-gray-300 min-h-screen'>
             <div>Library</div>
-
+            <div>
+                {library.likedAlbums.map((album) => (
+                    <div key={album.browseId}>
+                        {album.title}
+                       <img src={upscaleImage(album.thumbnail, 120)} alt="" />
+                    </div>
+                ))}
+            </div>
             <Songlist
             playSong={playSong}
             removeSong={removeSongFromLibrary}

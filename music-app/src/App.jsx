@@ -10,6 +10,9 @@ import ArtistPage from './components/ArtistPage.jsx'
 import SearchPageResults from './components/SearchPageResults.jsx'
 import Navbar from './components/Navbar.jsx'
 import { PlayerProvider } from './context/PlayerContext.jsx'
+import Queue from './components/Queue.jsx'
+import Playlist from './Playlist.jsx'
+import PlaylistPage from './components/PlaylistPage.jsx'
 import { usePlayer } from './context/PlayerContext.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
@@ -88,12 +91,16 @@ function App() {
               <Route path='/audio' element= {<AudioPlayer/>}></Route>
               <Route path='/artist/:id' element={<ArtistPage/>}></Route>
               <Route path='/album/:id' element={<AlbumPage/>}></Route>
+              <Route path='/playlist' element= {<Playlist/>}></Route>
+              <Route path='/playlist/:id' element={<PlaylistPage/>}></Route>
+
+              
           </Routes>
 
         
   
    
-
+   <Queue/>
 
    <AudioPlayer 
       streamUrl={streamUrl}
@@ -103,6 +110,8 @@ function App() {
       nextSong={nextSong}
       previousSong={previousSong}
     />
+
+   
     </>
 
   )

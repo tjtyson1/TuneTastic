@@ -20,6 +20,7 @@ function Login(){
                 
             }else{
                 console.error("Login failed")
+                window.alert("Login failed")
             }
         
         })

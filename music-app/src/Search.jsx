@@ -79,14 +79,14 @@ function Search({ getAlbum, streamUrl}){
 
     return(
         // navBar 
-        <div className="bg-gray-300 min-h-screen ">
+        <div className="bg-gray-300 min-h-screen  ">
             {/* search bar */}
-            <div className="flex justify-around items-center mt-5">
+            <div className="flex justify-around items-center ">
                 <form onSubmit={handleSearch}className="relative">
-                    <input type="text" placeholder="Search..." onChange={(e)=> setSearch(e.target.value)}className="flex px-4 py-2 text-l border border-white border rounded-full focus:outline-none bg-gray-200"/>
+                    <input type="text" placeholder="Search..." onChange={(e)=> setSearch(e.target.value)}className="flex px-4 py-2 text-l border border-white border rounded-full mt-10  focus:outline-none bg-gray-200"/>
                     <button 
                         onClick={handleSearch}
-                        className="absolute right-2 top-1 rounded-full text-2xl  h-4 text-gray-700 hover:cursor-pointer hover:scale-105 hover:text-gray-900"> 
+                        className="absolute right-2 top-11 rounded-full text-2xl  h-4 text-gray-700 hover:cursor-pointer hover:scale-105 hover:text-gray-900"> 
                         <FontAwesomeIcon 
                             className="text-gray-600"
                             icon="fa-solid fa-magnifying-glass" />

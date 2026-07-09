@@ -20,6 +20,7 @@ export default function AlbumPage({}){
     const { playAlbum } = usePlayer();
     const {upscaleImage} = usePlayer();
     const { shuffle } = usePlayer();
+    const  { addAlbumToLibrary } = usePlayer();
     const navigate = useNavigate();
     useEffect(() =>{    
     async function fetchAlbum() {
@@ -93,6 +94,11 @@ export default function AlbumPage({}){
                                 Shuffle
                                 </button>
 
+                            </div>
+                            <div>
+                                <button onClick={ () => addAlbumToLibrary(currentAlbum)}>
+                                    Add Album to Library
+                                </button>
                             </div>
                          
                         </div>

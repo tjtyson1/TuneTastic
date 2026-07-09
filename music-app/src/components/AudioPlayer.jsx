@@ -14,7 +14,7 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
     const audioRef = useRef(null);
-    const { shuffle, toggleShuffle,  nextSong, previousSong, currentSong } = usePlayer();
+    const { shuffle, toggleShuffle,  nextSong, previousSong, currentSong, isVisible, setVisible } = usePlayer();
     //Load new song
     useEffect(() =>{
 
@@ -127,7 +127,7 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
         return `${minutes}:${seconds.toString().padStart(2,"0")}`;
     }
     return(
-        <div className="fixed bottom-0 left-0 w-full bg-gray-600 text-white flex items-center justify-between px-4 py-3 ">
+        <div className="fixed bottom-0 left-0 w-full bg-gray-600/80 text-white flex items-center justify-between px-4 py-3 ">
            <img 
            className="rounded"
            loading="lazy"
@@ -164,6 +164,9 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
 
             <button onClick={toggleShuffle} className={`text-xl hover:cursor-pointer ${shuffle ? "text-primary" : "" }`}>
                 <FontAwesomeIcon icon="fa-solid fa-shuffle" /> 
+            </button>
+            <button onClick={() =>!isVisible ? setVisible(true): setVisible(false) }className="text-xl hover:cursor-pointer">
+                <FontAwesomeIcon icon="fa-solid fa-list"/>
             </button>
             <FontAwesomeIcon icon="fa-solid fa-volume" />
             <input
