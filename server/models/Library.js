@@ -4,7 +4,8 @@ const AlbumSchema = new mongoose.Schema({
     browseId: String,
     title: String,
     artists: [{
-        name: String
+        name: String,
+        browseId: String,
         }],
     thumbnail: String
 
@@ -14,7 +15,8 @@ const SongSchema = new mongoose.Schema({
     videoId: String,
     title: String,
     artists: [{
-        name: String
+        name: String,
+        browseId: String
         }],
     thumbnail: String
 

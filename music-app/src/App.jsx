@@ -15,7 +15,7 @@ import Playlist from './Playlist.jsx'
 import PlaylistPage from './components/PlaylistPage.jsx'
 import { usePlayer } from './context/PlayerContext.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-
+import Notification from './components/Notification.jsx'
 
 import albumPlaceHolder from "./assets/albumPlaceHolder.png"
 
@@ -26,6 +26,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
+import Dropdown from './components/Dropdown.jsx'
+import Home from './Home.jsx'
 
 
 library.add(fas, far, fab)
@@ -82,8 +84,9 @@ function App() {
     <>
      
           <Navbar/>
-      
+          
           <Routes>
+              <Route path='/' element= {<Home/>}></Route>
               <Route path='/register' element= {<Signup/>}></Route>
               <Route path='/login' element= {<Login/>}></Route>
               <Route path='/library' element= {<Library/>}></Route>
@@ -97,10 +100,13 @@ function App() {
               
           </Routes>
 
+          <Notification/>
         
   
    
    <Queue/>
+
+   <Dropdown/>
 
    <AudioPlayer 
       streamUrl={streamUrl}

@@ -7,6 +7,8 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { usePlayer } from "../context/PlayerContext";
+import Dropdown from "./Dropdown";
+import { useNavigate } from "react-router-dom";
 function AudioPlayer({songCover, songTitle, artists, streamUrl}){
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -14,15 +16,23 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
     const audioRef = useRef(null);
-    const { shuffle, toggleShuffle,  nextSong, previousSong, currentSong, isVisible, setVisible } = usePlayer();
+    const { shuffle, toggleShuffle,  nextSong, previousSong, currentSong, 
+        isVisible, setVisible, upscaleImage, addSongToLibrary, setOpenMenu, 
+        openMenu, openDropdown, currentUser} = usePlayer();
+
+    const navigate = useNavigate()
     //Load new song
     useEffect(() =>{
-
-        if(!streamUrl) return;
-
-        
+        const audio = audioRef.current;
        
-            const audio = audioRef.current;
+        if (!currentUser) {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.removeAttribute("src");
+        audio.load();
+        }
+       
+            
            if (!audio || !streamUrl) return;
            
                 audio.pause();
@@ -71,7 +81,7 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
     useEffect(()=>{
 
         const audio = audioRef.current;
-
+        if (!audio) return
         const update = () => {
             if (!audio) return
              setCurrentTime(audio.currentTime);
@@ -127,22 +137,27 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
         return `${minutes}:${seconds.toString().padStart(2,"0")}`;
     }
     return(
-        <div className="fixed bottom-0 left-0 w-full bg-gray-600/80 text-white flex items-center justify-between px-4 py-3 ">
+        <div className={`${!currentUser? "hidden" : "block"} fixed  bottom-2  left-1/2 transition  delay-150 ease-in-out 
+        ${isVisible? " -translate-x-7/10 w-4/6" : "w-4/6 -translate-x-1/2"}   bg-gray-200/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-200 border-gray-200 
+        dark:border-gray-600 flex items-center justify-between px-4 py-3  rounded-full border`}>
            <img 
-           className="rounded"
+           className="rounded-lg h-[60px] w-[60px] ml-3  "
            loading="lazy"
-            src={songCover} 
+            src={upscaleImage(songCover, 60)} 
            alt="" 
            onError={(e) =>{e.target.onerror = null; e.target.src = "/assets/albumPlaceHolder.png"}}/>
 
-            <div className="w-1/3">
-                <p className="text-sm">{songTitle || "No song selected"}</p>
-                <p className="text-xs text-gray-200">{artists?.map(artist => artist.name).join(", ")}</p>
+            <div className="pl-2 w-1/3">
+                <p className="text-sm line-clamp-2" title={songTitle}>{songTitle || "No song selected"}</p>
+                <p className="text-xs text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:underline line-clamp-2"
+                    onClick={(e) =>{e.stopPropagation(); 
+                        navigate(currentSong?.artists?.[0]?.browseId? `/artist/${currentSong?.artists?.[0]?.browseId}` : `search?q=${currentSong?.artists?.[0]?.name}&filter=artists`)}}
+                >{ currentSong?.artists?.map(artist => artist?.name).join(", ")} </p>
             </div>
             
             <span>{formatTime(currentTime)}</span>
             <input 
-                className="w-full h-2 bg-blue-500 accent-yellow-300"
+                className="w-full h-2  bg-primary accent-primary"
                 type="range"
                 min="0"
                 max={Number.isFinite(duration) ? duration : 0}
@@ -162,14 +177,32 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
                 <FontAwesomeIcon icon="fa-solid fa-forward-step" />
             </button>
 
-            <button onClick={toggleShuffle} className={`text-xl hover:cursor-pointer ${shuffle ? "text-primary" : "" }`}>
+            <button onClick={toggleShuffle} className={`text-md hover:cursor-pointer ${shuffle ? "text-primary" : "" }`}>
                 <FontAwesomeIcon icon="fa-solid fa-shuffle" /> 
             </button>
-            <button onClick={() =>!isVisible ? setVisible(true): setVisible(false) }className="text-xl hover:cursor-pointer">
+            <button onClick={() =>!isVisible ? setVisible(true): setVisible(false) }className="text-md hover:cursor-pointer">
                 <FontAwesomeIcon icon="fa-solid fa-list"/>
             </button>
-            <FontAwesomeIcon icon="fa-solid fa-volume" />
+            
+            <button className={`${!currentSong ? "hidden" : "block "} hover:cursor-pointer text-md`}
+                title="Add to Library"
+                onClick={()=> { addSongToLibrary(currentSong)}}>
+                <FontAwesomeIcon icon="fa-solid fa-plus" />
+            </button>
+
+            <button className={`${!currentSong ? "hidden" : "block "} hover:cursor-pointer text-md`}
+                onClick={(e) => {
+                                e.stopPropagation();
+                                openDropdown(e, currentSong)
+                            }} 
+                >
+                <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
+            </button>
+            
+            
+            <FontAwesomeIcon icon="fa-solid fa-volume" className="text-md"/>
             <input
+                className="accent-primary"
                 type="range"
                 min="0"
                 max="1"
@@ -177,7 +210,6 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
                 value={volume}
                 onChange={handleVolume}
 />
-            <div className="w-1/3 text-right text-xs">LOGO</div>
 
             <audio ref={audioRef} onEnded={nextSong}/>
               

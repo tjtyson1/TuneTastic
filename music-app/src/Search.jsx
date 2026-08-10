@@ -4,7 +4,7 @@ import albumPlaceHolder from "./assets/albumPlaceHolder.png"
 
 import axios from "axios";
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePlayer } from "./context/PlayerContext";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -22,7 +22,20 @@ function Search({ getAlbum, streamUrl}){
     const [currentView, setCurrentView] = useState("search");
     const [currentAlbum, setCurrentAlbum] = useState(null)
     const [currentArtist, setCurrentArtist] = useState(null)
+    const [loading, setLoading] = useState(false)
+    const [searchParams] = useSearchParams();
+    const query = searchParams.get("q")
+    const filterParam = searchParams.get("filter")
+
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (query) {
+            setSearch(query)
+            setFilter(filterParam || "songs")
+            searchMusic(query, filterParam || "songs");
+        }
+    }, [query, filterParam])
 
     const { playSong } = usePlayer();
 
@@ -61,38 +74,57 @@ function Search({ getAlbum, streamUrl}){
     }
 
     async function handleSearch(e){
+         e.preventDefault();
         if (!search.trim()) return;
-        e.preventDefault();
+       
         console.log(`Searching for: ${search} filter: ${filter}`)
         
-        if (filter == undefined){
-            filter = ""
-        }
-        const response = await axios.get(
-                `http://localhost:3001/api/music/search?q=${search}&filter=${filter}`
+        
+       
+        navigate(`/search?q=${search}&filter=${filter}`)
+        setCurrentView("search")
+        
+        
+    }
+    async function searchMusic(query, filter){
+        try{
+            setLoading(true)
+            const response = await axios.get(
+            `http://localhost:3001/api/music/search?q=${query}&filter=${filter}`
 
         );
-        setCurrentView("search")
-        setResults(response.data.results)
-        console.log(response)
-    }
 
+        setResults(response?.data?.results)
+            
+        }catch(error){
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+        
+    }
     return(
-        // navBar 
-        <div className="bg-gray-300 min-h-screen  ">
+        
+        <div className="bg-gray-300 dark:bg-gray-900 dark:text-gray-200  min-h-screen pt-20 ">
             {/* search bar */}
             <div className="flex justify-around items-center ">
                 <form onSubmit={handleSearch}className="relative">
-                    <input type="text" placeholder="Search..." onChange={(e)=> setSearch(e.target.value)}className="flex px-4 py-2 text-l border border-white border rounded-full mt-10  focus:outline-none bg-gray-200"/>
+                    <input type="text" placeholder="Search..." onChange={(e)=> setSearch(e.target.value)}
+                    className="flex px-4 py-2 text-l border border-white  border rounded-full mt-10  focus:outline-none bg-gray-200 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"/>
                     <button 
                         onClick={handleSearch}
                         className="absolute right-2 top-11 rounded-full text-2xl  h-4 text-gray-700 hover:cursor-pointer hover:scale-105 hover:text-gray-900"> 
                         <FontAwesomeIcon 
-                            className="text-gray-600"
+                            className="text-gray-600 dark:text-gray-200"
                             icon="fa-solid fa-magnifying-glass" />
                     </button>
-                    <select name="" id="selectInput"value={filter} onChange={(e)=> setFilter(e.target.value)}className=" focus:outline-none">
-                        <option value="">All</option>
+                    <select name="" id="selectInput"value={filter} 
+                    onChange={(e)=> {const newFilter = e.target.value
+                        setFilter(newFilter); if (search.trim()) {
+            navigate(`/search?q=${search}&filter=${newFilter}`);
+            }   
+            }}
+                    className=" focus:outline-none">
                         <option value="songs">Songs</option>
                         <option value="artists">Artist</option>
                         <option value ="albums">Album</option>
@@ -100,7 +132,16 @@ function Search({ getAlbum, streamUrl}){
                 </form>
                 
             </div>
-              
+            {loading ? ( 
+                <div className=" h-screen flex flex-col items-center justify-center dark:bg-gray-900">
+                    <div className=" h-12 w-12 animate-spin rounded-full border-4 border-gray-400 border-t-blue-600">
+                    </div>
+
+                    <p className="mt-4 text-gray-700 text-lg dark:text-gray-200">
+                            Searching...
+                        </p>
+
+            </div>) : (
               <SearchPageResults 
                 currentView={currentView}
                 result={result}
@@ -109,7 +150,8 @@ function Search({ getAlbum, streamUrl}){
                     getArtist={getArtist}
                     getAlbum={getAlbum}>
                     </SearchPageResults>
-                 
+            )
+            }
         </div>
         
     )

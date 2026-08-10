@@ -19,8 +19,8 @@ function Signup() {
         .catch(err=> console.log(err))
     }
     return(
-        <div className="flex justify-center items-center bg-gray-500 h-screen">
-            <div className="bg-white p-4 rounded w-1/4">
+        <div className="flex justify-center items-center bg-gray-500 dark:bg-gray-900 h-screen text-gray-900 dark:text-gray-200">
+            <div className="bg-gray-200 dark:bg-gray-800 p-4 rounded w-1/4">
                 <h2 className="text-3xl font-bold mb-4">Register</h2>
                  <form onSubmit={handleSubmit}>
                     <div className="mb-4">
@@ -32,7 +32,7 @@ function Signup() {
                         placeholder="Enter Name"
                         autoComplete="off"
                         name="email"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         onChange={(e) => setName(e.target.value)} 
                         />
                     </div>
@@ -45,7 +45,7 @@ function Signup() {
                         placeholder="Enter Email"
                         autoComplete="off"
                         name="email"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         onChange={(e) => setEmail(e.target.value)}  
                         />
                     </div>
@@ -58,17 +58,17 @@ function Signup() {
                         placeholder="Enter Password"
                         autoComplete="off"
                         name="email"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-4"
                         onChange={(e) => setPassword(e.target.value)} 
                         />
                     <br />
-                    <button type="submit" className="px-4 py-2 bg-green-700 w-full rounded-md text-white hover:bg-green-900"> Register</button>
+                    <button type="submit" className="px-4 py-2 bg-green-700 w-full rounded-lg text-white hover:bg-green-900"> Register</button>
                     
                 </div>
             </form>
                 <p> Already Have an Account?</p>
                 <br />
-                <Link to="/Login" className="block text-center px-4 py-2 bg-gray-400 w-full rounded-md text-white hover:bg-gray-600">
+                <Link to="/Login" className="block text-center px-4 py-2 bg-gray-400 w-full rounded-lg text-white hover:bg-gray-600">
                     Login
                     </Link>
 

@@ -255,6 +255,16 @@ async function removeSongFromPlaylist(req, res){
             userId: req.params.userId
         });
 
+        if (!library) {
+            library = await LibraryModel.create({
+                userId,
+                likedSongs: [],
+                likedAlbums: [],
+                playlists: [],
+                recentlyPlayed: []
+            });
+        }
+
         res.json(library)
     }catch(err){
         res.status(500).json(err);

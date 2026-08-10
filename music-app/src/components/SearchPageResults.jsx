@@ -13,17 +13,17 @@ import Dropdown from "./Dropdown";
 export default function SearchPageResults({currentView, result = [], filter,}){
     
     const { id } = useParams();
-    const {addSongToLibrary, setShowDropdown, playSong, getArtist, getAlbum, setOpenMenu, openMenu} = usePlayer()
+    const {addSongToLibrary, setShowDropdown, playSong, openDropdown, normalizeSong , addAlbumToLibrary} = usePlayer()
     if (currentView !== "search") return null;
 
-// optional helper (move to utils later)
+
     const {upscaleImage} = usePlayer()
+    const navigate = useNavigate()
 
 
-
-
+    console.log(result)
     return(
-        <div className="bg-gray-300 min-h-screen">
+        <div className="bg-gray-300 min-h-screen dark:bg-gray-900">
             {/* all results */}
             { filter == " " &&
                 <div>
@@ -32,26 +32,39 @@ export default function SearchPageResults({currentView, result = [], filter,}){
             }
                     {/* Song search*/}
                       { filter=="songs" &&
-                          <div className=" grid xl:grid-cols-5 lg:grid-cols-3  md:grid-cols-2 px-4 py-2 gap-4 mb-[85px]"> 
+                          <div className=" grid xl:grid-cols-5 lg:grid-cols-3  md:grid-cols-2 px-4 py-2 gap-4 pb-24 "> 
                               {result.slice(0,20).map((song) => (
-                                  <div key={song.videoId} onClick={() => {playSong(song, result)}} className=" flex p-4 justify-center overflow-hide rounded-lg  bg-gray-200 hover:bg-gray-100 active:bg-gray-300">  
-                                  <div className=" flex-shrink-0 grid p-2 justify-center m-auto w-64 rounded-lg hover:bg-gray-100">
+                                  <div 
+                                    key={song.videoId} onClick={() => {playSong(normalizeSong(song), result)}} 
+                                    className="w-66 h-64 flex p-4 justify-center overflow-hide rounded-lg dark:bg-gray-700 bg-gray-200 
+                                        dark:hover:bg-gray-600 hover:bg-gray-100 active:bg-gray-100/50 dark:active:bg-gray-800/50  ">  
+
+                                  <div className=" flex-shrink-0 grid  justify-center m-auto w-64 rounded-lg ">
                                      <img loading="lazy" decoding="async" src={upscaleImage(song.thumbnails[0].url, 120)} alt="" className="m-auto justify-center rounded w-30 h-30 aspect-square object-cover" onError={(e) =>{e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
-                                      <h2 className=" text-left font-semibold line-clamp-3 mt-2 h-12 ">{song.title}</h2>
-                                      <p className="text-left h-6">{song.artists.map(artist => artist.name).join(", ")}</p>
-                                    <div className="flex justify-end relative ">
-                                        <button onClick={(e) => {
-                                            e.stopPropagation();
-                                            addSongToLibrary(song);
-                                            }}>
+                                      
+                                      <h2 className=" text-left font-semibold line-clamp-2 mt-2 w-30 text-l text-gray-800 dark:text-gray-200">{song.title}</h2>
+
+                                      <p className="text-left h-6 text-gray-600 hover:underline text-l  dark:text-gray-200 dark:text-gray-400 "
+                                        onClick={(e) => {navigate(song?.artists?.[0].id? `/artist/${song?.artists?.[0].id}` : `search?q=${song?.artists?.[0].name}&filter=artists`)}}>
+                                        {song.artists.map(artist => artist.name).join(", ")}</p>
+                                    <div className="flex justify-end  p-2 w-30 h-10 ">
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                addSongToLibrary(song);
+                                                }}
+                                                className="text-gray-700 dark:text-gray-300 hover:text-gray-400 hover:text-gray-500 hover:cursor-pointer ">
+                                            
                                          <FontAwesomeIcon icon="fa-solid fa-plus" />
                                         
                                       </button>
-                                        <button onClick={() => {setOpenMenu(openMenu === song.videoId ? null : song.videoId)}} 
-                                            className="hover:gray-200 hover:cursor-pointer px-4 py-2"> 
-                                                <FontAwesomeIcon icon="fa-solid fa-ellipsis" /></button>
-                                                <Dropdown
-                                                song={song}/>
+                                        <button onClick={(e) => {
+                                             e.stopPropagation();
+                                            openDropdown(e, song)}} 
+                                            className="text-gray-700 dark:text-gray-300 hover:text-gray-400 hover:text-gray-500 hover:cursor-pointer"> 
+                                                <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
+                                                </button>
+                                               
                                     </div>
                                   </div>
                                      
@@ -65,14 +78,30 @@ export default function SearchPageResults({currentView, result = [], filter,}){
                           }  
                     {/* Album Search */}
                         { filter=="albums" &&
-                                        <div className=" grid grid-cols-4 gap-4"> 
+                                        <div className="grid xl:grid-cols-5 lg:grid-cols-3  md:grid-cols-2 px-4 py-2 gap-4 pb-24 "> 
                                         {result.slice(0,20).map((song) => (
-                                            <div key={song.browseId} onClick={() => {getAlbum(song.browseId)}} className=" grid items-center text-center justify-center overflow-hide px-4 py-2 rounded-lg  bg-gray-200 hover:bg-gray-100 active:bg-gray-300">  
-                                                <img loading="lazy" src={upscaleImage(song.thumbnails[0].url, 120)} alt="" className="m-auto rounded" onError={(e) =>{ e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
-                                                <h2 className=" text-l ">{song.title}</h2>
-                                                <p className="text-m">{song.artists.map(artist => artist.name).join(", ")}</p>
-                                                <button className=" bg-blue-300 px-4 py-2 rounded-full hover:scale-105 hover:cursor-pointer"> Go to Album </button>
+                                            <div key={song.browseId} onClick={() => {navigate(`/album/${song.browseId}`)}}
+                                             className="w-66 h-64 flex p-4 justify-center overflow-hide rounded-lg dark:bg-gray-700 bg-gray-200 
+                                        dark:hover:bg-gray-600 hover:bg-gray-100 active:bg-gray-100/50 dark:active:bg-gray-800/50  ">  
+                                                <div className="flex-shrink-0 grid  justify-center m-auto w-64 rounded-lg ">
+                                                    <img loading="lazy" src={upscaleImage(song.thumbnails[0].url, 120)} alt="" className="m-auto rounded" onError={(e) =>{ e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
+                                                <h2 className="text-left font-semibold line-clamp-2 mt-2 w-30 text-l text-gray-800 dark:text-gray-200  ">{song.title}</h2>
+                                                <p className="text-left h-6 text-gray-600 hover:underline text-l  dark:text-gray-200 dark:text-gray-400 ">{song.artists.map(artist => artist.name).join(", ")}</p>
+                                                 <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                addAlbumToLibrary(song);
+                                                }}
+                                                className="text-gray-700 dark:text-gray-300 hover:text-gray-400 hover:text-gray-500 hover:cursor-pointer flex justify-end">
+                                            
+                                         <FontAwesomeIcon icon="fa-solid fa-plus" />
+                                        
+                                      </button>
                                                 </div>
+                                                
+
+                                                </div>
+                                                
                                                 
                                         
                                         ))}  
@@ -84,13 +113,19 @@ export default function SearchPageResults({currentView, result = [], filter,}){
                         
                         {/* Artist Search */}
                                           { filter=="artists" &&
-                                            <div className=" grid grid-cols-4 gap-4"> 
+                                            <div className="grid xl:grid-cols-5 lg:grid-cols-3  md:grid-cols-2 px-4 py-2 gap-4 pb-24 "> 
                                             {result.slice(0,20).map((song) => (
-                                                <div key={song.browseId} onClick={() => {getArtist(song.browseId)}} className=" grid items-center text-center justify-center overflow-hide px-4 py-2 rounded-lg  bg-gray-200 hover:bg-gray-100 active:bg-gray-300">  
-                                                    <img loading="lazy" src={upscaleImage(song.thumbnails[0].url, 120)} alt="" className="m-auto rounded" onError={(e) =>{ e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
-                                                    <h2 className=" text-l ">{song.title}</h2>
-                                                    <p className="text-m">{song.artists.map(artist => artist.name).join(", ")}</p>
-                                                    <button className=" bg-blue-300 px-4 py-2 rounded-full hover:scale-105 hover:cursor-pointer"> View Artist </button>
+                                                <div key={song.browseId} 
+                                                    onClick={() => {navigate(`/artist/${song.browseId}`)}} 
+                                                    className="w-66 h-64 flex p-4 justify-center overflow-hide rounded-lg dark:bg-gray-700 bg-gray-200 
+                                                    dark:hover:bg-gray-600 hover:bg-gray-100 active:bg-gray-100/50 dark:active:bg-gray-800/50">  
+                                                    <div className="flex-shrink-0 grid  justify-center m-auto w-64 rounded-lg ">
+                                                        <img loading="lazy" src={upscaleImage(song.thumbnails[0].url, 120)} alt="" className="m-auto rounded" onError={(e) =>{ e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
+                                                    <h2 className=" text-left font-semibold line-clamp-2 mt-2 w-30 text-l text-gray-800 dark:text-gray-200">{song.title}</h2>
+
+                                                    </div>
+                                                    
+
                                                     </div>
                                             
                                                  

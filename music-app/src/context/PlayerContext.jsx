@@ -24,8 +24,23 @@ export function PlayerProvider({children}){
         }) 
     const [playlistName, setPlaylistName] = useState("")
 
-    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const [showNotification, setShowNotification] = useState({
+        show: false,
+        message: "",
+        showTime: 3
+    })
+
+    const [loadedPlayer ,setLoadedPlayer] = useState(false)
+
+    const [currentTime, setCurrentTime] = useState(0)
+    
+    const [currentUser, setCurrentUser] = useState(() => {
+        const savedUser = localStorage.getItem("user");
+        return savedUser ? JSON.parse(localStorage.getItem("user")) : null;
+    });
+    
     console.log(currentSong)
+    
     useEffect(() => {
     if (currentSong) {
         localStorage.setItem(
@@ -36,32 +51,52 @@ export function PlayerProvider({children}){
 }, [currentSong]);
 
     useEffect(() =>{
+        if (!loadedPlayer) return
         localStorage.setItem("history", JSON.stringify(history))
     },[history]);
 
      useEffect(() => {
-    localStorage.setItem("queue", JSON.stringify(queue));
+        if (!loadedPlayer) return
+        localStorage.setItem("queue", JSON.stringify(queue));
     }, [queue]);
+     
+    useEffect(() => {
+        if (!loadedPlayer) return
+    localStorage.setItem("currentIndex", JSON.stringify(currentIndex));
+    }, [currentIndex]);
+
+    
 
     useEffect(() => {
-    const savedQueue = JSON.parse(localStorage.getItem("queue"));
-
-    if (savedQueue) {
-        setQueue(savedQueue);
-    }
-    }, []);
-
-    useEffect(() => {
+    const savedQueue = JSON.parse(localStorage.getItem("queue") || "[]");
+    
     const savedSong = JSON.parse(localStorage.getItem("currentSong"));
 
-    if (savedSong) {
-        setCurrentSong(savedSong);
+    const savedHistory = JSON.parse(localStorage.getItem("history" || []));
+    
+    const savedIndex = JSON.parse(localStorage.getItem("currentIndex" ));
+    
+
+    if (savedQueue?.length) {
+        setQueue(savedQueue);
     }
-}, []);
+    if (savedHistory?.length){
+        setHistory(savedHistory);
+    }
+    if (savedIndex !== null){
+        setCurrentIndex(savedIndex);
+    }
+     if (savedSong) {
+        playSong(normalizeSong(savedSong), savedQueue, true);
+     }
+     setLoadedPlayer(true)
+    }, []);
+
 
 useEffect(() => {
-    loadLibrary();
-}, []);
+    if(currentUser)
+        {loadLibrary();}
+}, [currentUser]);
 
 
      async function playAlbum(album, index = 0, shuffle = false) {
@@ -73,25 +108,35 @@ useEffect(() => {
         setCurrentAlbum(album)
         console.log(album?.tracks?.length)
         
-        const albumTracks = album?.tracks?.map(track => ({...track, thumbnails: [{url: upscaleImage(album?.album?.thumbnail,60)}] }))
+        const albumTracks = album?.tracks?.map(track => normalizeSong(track,album))
         const playlist = shuffle ? shuffleSongs([...albumTracks]) : albumTracks 
-            
+        const albumArtist = album?.artist?.name
         
         setQueue(playlist);
         console.log(queue)
         setCurrentIndex(index);
-        await playSong(playlist[index], playlist);
+        await playSong (normalizeSong(playlist[index], album), playlist);
     }
 
     function upscaleImage(url, size) {
-              if (!url) return albumPlaceHolder;
-              return url.replace(/w\d+-h\d+/, `w${size}-h${size}`);
+            //   if (!url) return albumPlaceHolder;
+              return url?.replace(/w\d+-h\d+/, `w${size}-h${size}`);
           }
+    
+    async function selectSong(song, queue){
+        
+    }
 
-     async function playSong(song, songList = [], addToHistory = true){
-        if (currentSong?.videoId === song.videoId) {
-            return;
+     async function playSong(song, songList = [], restore = false){
+        
+        if (currentSong?.videoId !== song.videoId) {
+            setCurrentTime(0);
         }
+
+         if (!restore && currentSong?.videoId !== song.videoId) {
+            setCurrentTime(0);
+        }
+
 
 
               setCurrentSong(song);
@@ -178,7 +223,7 @@ useEffect(() => {
               }
       
           }
-          playSong(next, queue);
+          playSong(normalizeSong(next), queue);
         }
       
           function previousSong(){
@@ -195,7 +240,7 @@ useEffect(() => {
                if (index !==-1 ){
                 setCurrentIndex(index)
                }
-                  playSong(lastSong, queue, false);
+                  playSong(normalizeSong(lastSong), queue, false);
               
           }
 
@@ -218,8 +263,9 @@ useEffect(() => {
          }
 
          async function loadLibrary() {
+             if (!currentUser) return;
                  const response = await axios.get(
-                     `http://localhost:3001/api/library/${currentUser._id}`
+                     `http://localhost:3001/api/library/${currentUser?._id}`
                  );
                  console.log("GET DATA:", response.data)
                  setLibrary(response.data);
@@ -229,17 +275,29 @@ useEffect(() => {
     async function addSongToLibrary(song) {
         try {
             await axios.post("http://localhost:3001/api/library/song", {
-                userId: currentUser._id,
+                userId: currentUser?._id,
                 song: {
                     videoId: song.videoId,
                     title: song.title,
-                    artists: song.artists,
-                    thumbnail: song.thumbnails?.[0]?.url || song?.thumbnail
-                }
-            });
+                     artists: Array.isArray(song.artists)
+                    ? song.artists.map(artist => ({
+                        name: artist.name || "",
+                        browseId: artist.browseId || artist.id || ""
+                    }))
+                    : [
+                        {
+                            name: song.artists?.name || "",
+                            browseId: song.artists?.browseId || ""
+                        }
+                    ],
+
+                thumbnail: song.thumbnails?.[0]?.url || song.thumbnail
+            }
+        });
+
             
 
-            console.log("Song added!");
+            setShowNotification({show: true, message: `${song.title} added`, showTime: 3})
         } catch (err) {
             console.error(err);
         }
@@ -247,17 +305,17 @@ useEffect(() => {
     async function addAlbumToLibrary(album) {
         try {
             await axios.post("http://localhost:3001/api/library/album", {
-                userId: currentUser._id,
+                userId: currentUser?._id,
                 album: {
-                    browseId: album?.album?.browseId,
-                    title: album?.album?.title,
-                    artists: album?.artists?.name,
-                    thumbnail: album?.album?.thumbnail
+                    browseId: album?.album?.browseId || album.browseId,
+                    title: album?.album?.title || album.title,
+                    artists: [{name: album?.artist?.name || album?.artists?.[0]?.name, browseId: album?.artist?.browseId || album.artistBrowseId || album.artists?.[0]?.browseId}],
+                    thumbnail: album?.album?.thumbnail || album?.thumbnails?.[0]?.url
                 }
             });
             
 
-            console.log("Song added!");
+            setShowNotification({show: true, message: `${album?.album?.title || album.title} added to Library`, showTime: 3})
         } catch (err) {
             console.error(err);
         }
@@ -267,7 +325,7 @@ useEffect(() => {
         try {
             await axios.delete("http://localhost:3001/api/library/song", {
                 data:{
-                    userId: currentUser._id,
+                    userId: currentUser?._id,
                     videoId
                 }
             });
@@ -289,7 +347,7 @@ useEffect(() => {
         try {
             await axios.delete("http://localhost:3001/api/library/album", {
                 data:{
-                    userId: currentUser._id,
+                    userId: currentUser?._id,
                     browseId
                 }
             });
@@ -311,11 +369,12 @@ useEffect(() => {
     async function addPlaylist(name){
         try {
             const response = await axios.post("http://localhost:3001/api/library/playlist", {
-                userId: currentUser._id,
+                userId: currentUser?._id,
                 name
                 
             });
             console.log("playlist added");
+            setShowNotification({show: true, message: `${name} added`, showTime: 3})
 
             setLibrary(response.data)
             
@@ -328,7 +387,7 @@ useEffect(() => {
         try {
              await axios.delete("http://localhost:3001/api/library/playlist", {
                 data:{
-                     userId: currentUser._id,
+                     userId: currentUser?._id,
                     playlistId
                 }
             });
@@ -348,25 +407,147 @@ useEffect(() => {
         
     }
 
-    async function addSongToPlaylist(song, playlistId){
+    async function addSongToPlaylist(song, playlistId, playlistName){
         try {
             await axios.post("http://localhost:3001/api/library/playlist/song", {
-                userId: currentUser._id,
+                userId: currentUser?._id,
                 playlistId,
                 song: {
                     videoId: song.videoId,
                     title: song.title,
-                    artists: song.artists,
-                    thumbnail: song.thumbnails?.[0]?.url || song?.thumbnail
-                }
-            });
+                     artists: Array.isArray(song.artists)
+                    ? song.artists.map(artist => ({
+                        name: artist.name || "",
+                        browseId: artist.browseId || artist.id || ""
+                    }))
+                    : [
+                        {
+                            name: song.artists?.name || "",
+                            browseId: song.artists?.browseId || ""
+                        }
+                    ],
+
+                thumbnail: song.thumbnails?.[0]?.url || song.thumbnail
+            }
+        });
+
             
 
-            console.log("Song added!");
+            setShowNotification({show: true, message: `${song.title} added  to ${playlistName}`, showTime: 3})
         } catch (err) {
             console.error(err);
         }
     }
+
+    async function removeSongFromPlaylist(playlistId, videoId){
+         try {
+            await axios.delete("http://localhost:3001/api/library/playlist/song", {
+                 data:{
+                    userId: currentUser?._id,
+                    playlistId,
+                    videoId
+                }
+            });
+           
+            setLibrary(prev => ({
+                ...prev,
+                playlists: prev.playlists.map(playlist => 
+                    playlist._id === playlistId ? 
+                    {
+                        ...playlist,
+                        songs: playlist.songs.filter(
+                            song => song.videoId !== videoId
+                        ),
+                    }
+                    : playlist
+                ),
+                
+                 
+            }));
+            
+
+            console.log("Song removed!");
+        } catch (err) {
+            console.error(err);
+        }
+
+
+    }
+
+    function addSongToQueue(song){
+        
+        
+        setQueue(prev => { const updatedQueue = prev.filter( queue => queue?.videoId !== song.videoId );
+    
+        return [...updatedQueue.slice(0, currentIndex + 1),song, ...updatedQueue.slice(currentIndex + 1)];
+    });
+    }
+
+    function openDropdown(event, song){
+
+        const rect = event.currentTarget.getBoundingClientRect();
+
+        const menuHeight = 180;
+        const menuWidth = 180
+
+        const openUp = rect.bottom + menuHeight > window.innerHeight;
+        const openLeft = rect.right + menuWidth > window.innerWidth;
+
+        setOpenMenu({
+            song, 
+            x: openLeft ? rect.right - menuWidth : rect.left,
+            
+            y: openUp ? rect.top - menuHeight : rect.bottom,
+            openUp,
+            openLeft,
+        });
+    }
+
+    function normalizeSong(song, album = null) {
+        return {
+            ...song,
+
+            artists: Array.isArray(song.artists)
+                ? song.artists.map(artist => ({
+                    name: artist.name,
+                    browseId: artist.browseId ?? null
+                }))
+                : song.artists?.name
+                    ? [song.artists]
+                    : song.artist
+                        ? [{
+                            name: song.artist,
+                            browseId: song.artistBrowseId ?? null
+                        }]
+                        : album?.artist
+                            ? [{
+                                name: album.artist.name,
+                                browseId: album.artist.browseId
+                            }]
+                            : [],
+            
+            thumbnails: song.thumbnails?.length
+            ? song.thumbnails 
+            : album?.album?.thumbnail
+                ? [{ url: upscaleImage(album.album.thumbnail, 60)}]
+                : [],
+
+            album: song.album ?? (
+                album
+                    ? {
+                        title: album.album.title,
+                        browseId: album.album.browseId,
+                        thumbnail: album.album.thumbnail,
+                    }
+                    : null
+            ),
+
+                videoId: song.videoId,
+        };
+    }
+        
+        
+    
     
 
 
@@ -378,15 +559,20 @@ useEffect(() => {
                     nextSong,
                     previousSong,
                     streamUrl,
+                    setStreamUrl,
                     currentSong,
+                    setCurrentSong,
                     currentAlbum,
                     queue,
+                    setQueue,
                     history,
+                    setHistory,
                     currentIndex,
                     upscaleImage,
                     shuffle, 
                     toggleShuffle,
                     library,
+                    setLibrary,
                     loadLibrary,
                     addSongToLibrary,
                     removeSongFromLibrary,
@@ -402,7 +588,15 @@ useEffect(() => {
                     setShowDropdown,
                     showDropdown,
                     openMenu,
-                    setOpenMenu
+                    setOpenMenu,
+                    currentUser,
+                    setCurrentUser,
+                    removeSongFromPlaylist,
+                    showNotification, setShowNotification,
+                    currentTime,setCurrentTime,
+                    addSongToQueue, openDropdown,
+                    normalizeSong
+                    
 
                 }}
                 >

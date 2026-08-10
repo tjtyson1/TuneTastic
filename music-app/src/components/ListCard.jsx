@@ -1,8 +1,9 @@
 
 
-export default function ListCard({name, imgSrc, onClick}){
+export default function ListCard({name, imgSrc, function1}){
+    
     return(
-        <figure className="grid p-2 justify-center m-auto w-56 rounded-lg hover:bg-gray-100 " onClick={() => {onClick}}>
+        <figure className="grid p-2 justify-center m-auto w-56 " onClick={function1}>
             <img 
                 loading="lazy"
                 src={imgSrc} alt=""
