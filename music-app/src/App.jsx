@@ -39,7 +39,7 @@ function App() {
       const [filter,setFilter] = useState("songs")
       
       const [currentView, setCurrentView] = useState("search");
-     
+      const API_URL = import.meta.env.VITE_API_URL;
       const {
         streamUrl,
         currentSong,
@@ -63,7 +63,7 @@ function App() {
               filter = ""
           }
           const response = await axios.get(
-                  `http://localhost:3001/api/music/search?q=${search}&filter=${filter}`
+                  `${API_URL}/api/music/search?q=${search}&filter=${filter}`
   
           );
           setCurrentView("search")

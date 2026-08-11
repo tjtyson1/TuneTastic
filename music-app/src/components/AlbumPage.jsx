@@ -17,7 +17,7 @@ export default function AlbumPage({}){
     
     const [currentAlbum, setCurrentAlbum] = useState(null);
 
-    const  { addAlbumToLibrary, shuffle, upscaleImage, playAlbum, playSong, addSongToLibrary,  openDropdown} = usePlayer();
+    const  { addAlbumToLibrary, shuffle, upscaleImage, playAlbum, playSong, addSongToLibrary,  openDropdown, API_URL} = usePlayer();
     console.log(currentAlbum)
     const navigate = useNavigate();
     useEffect(() =>{    
@@ -25,7 +25,7 @@ export default function AlbumPage({}){
         
        
         const res = await axios.get(
-                `http://localhost:3001/api/music/albums/${id}`
+                `${API_URL}/api/music/albums/${id}`
             );
             
             setCurrentAlbum(res.data)

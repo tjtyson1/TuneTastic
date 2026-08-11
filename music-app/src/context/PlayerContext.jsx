@@ -24,6 +24,8 @@ export function PlayerProvider({children}){
         }) 
     const [playlistName, setPlaylistName] = useState("")
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const [showNotification, setShowNotification] = useState({
         show: false,
         message: "",
@@ -157,7 +159,7 @@ useEffect(() => {
               
           try{
               const response = await axios.get(
-                  `http://localhost:3001/api/music/stream?id=${song.videoId}`
+                  `${API_URL}/api/music/stream?id=${song.videoId}`
               ); 
        
               console.log(response)
@@ -265,7 +267,7 @@ useEffect(() => {
          async function loadLibrary() {
              if (!currentUser) return;
                  const response = await axios.get(
-                     `http://localhost:3001/api/library/${currentUser?._id}`
+                     `${API_URL}/api/library/${currentUser?._id}`
                  );
                  console.log("GET DATA:", response.data)
                  setLibrary(response.data);
@@ -274,7 +276,7 @@ useEffect(() => {
 
     async function addSongToLibrary(song) {
         try {
-            await axios.post("http://localhost:3001/api/library/song", {
+            await axios.post(`${API_URL}/api/library/song`, {
                 userId: currentUser?._id,
                 song: {
                     videoId: song.videoId,
@@ -304,7 +306,7 @@ useEffect(() => {
     }
     async function addAlbumToLibrary(album) {
         try {
-            await axios.post("http://localhost:3001/api/library/album", {
+            await axios.post(`${API_URL}/api/library/album`, {
                 userId: currentUser?._id,
                 album: {
                     browseId: album?.album?.browseId || album.browseId,
@@ -323,7 +325,7 @@ useEffect(() => {
 
     async function removeSongFromLibrary(videoId) {
         try {
-            await axios.delete("http://localhost:3001/api/library/song", {
+            await axios.delete(`${API_URL}/api/library/song`, {
                 data:{
                     userId: currentUser?._id,
                     videoId
@@ -345,7 +347,7 @@ useEffect(() => {
     }
      async function removeAlbumFromLibrary(browseId) {
         try {
-            await axios.delete("http://localhost:3001/api/library/album", {
+            await axios.delete(`${API_URL}/api/library/album`, {
                 data:{
                     userId: currentUser?._id,
                     browseId
@@ -368,7 +370,7 @@ useEffect(() => {
 
     async function addPlaylist(name){
         try {
-            const response = await axios.post("http://localhost:3001/api/library/playlist", {
+            const response = await axios.post(`${API_URL}/api/library/playlist`, {
                 userId: currentUser?._id,
                 name
                 
@@ -385,7 +387,7 @@ useEffect(() => {
     }
     async function removePlaylist(playlistId){
         try {
-             await axios.delete("http://localhost:3001/api/library/playlist", {
+             await axios.delete(`${API_URL}/api/library/playlist`, {
                 data:{
                      userId: currentUser?._id,
                     playlistId
@@ -409,7 +411,7 @@ useEffect(() => {
 
     async function addSongToPlaylist(song, playlistId, playlistName){
         try {
-            await axios.post("http://localhost:3001/api/library/playlist/song", {
+            await axios.post(`${API_URL}/api/library/playlist/song`, {
                 userId: currentUser?._id,
                 playlistId,
                 song: {
@@ -441,7 +443,7 @@ useEffect(() => {
 
     async function removeSongFromPlaylist(playlistId, videoId){
          try {
-            await axios.delete("http://localhost:3001/api/library/playlist/song", {
+            await axios.delete(`${API_URL}/api/library/playlist/song`, {
                  data:{
                     userId: currentUser?._id,
                     playlistId,
@@ -595,7 +597,7 @@ useEffect(() => {
                     showNotification, setShowNotification,
                     currentTime,setCurrentTime,
                     addSongToQueue, openDropdown,
-                    normalizeSong
+                    normalizeSong,API_URL
                     
 
                 }}

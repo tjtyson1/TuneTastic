@@ -17,7 +17,7 @@ export default function PlaylistPage(){
         
         const [currentPlaylist, setCurrentPlaylist] = useState(null)
     
-        const { playSong, upscaleImage, shuffle, currentUser, removeSongFromPlaylist, library, } = usePlayer();
+        const { playSong, upscaleImage, shuffle, currentUser, removeSongFromPlaylist, library, API_URL } = usePlayer();
        
        
         const navigate = useNavigate();
@@ -39,7 +39,7 @@ export default function PlaylistPage(){
             
            
             const res = await axios.get(
-                    `http://localhost:3001/api/library/playlist/${currentUser._id}/${id}`
+                    `${API_URL}/api/library/playlist/${currentUser._id}/${id}`
                 );
                 
                 setCurrentPlaylist(res.data)

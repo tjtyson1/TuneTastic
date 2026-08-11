@@ -17,12 +17,12 @@ export default function ArtistPage({}){
 
     const [currentArtist, setCurrentArtist] = useState(null);
    
-    const {upscaleImage, playSong, addSongToLibrary, normalizeSong, openDropdown} = usePlayer();
+    const {upscaleImage, playSong, addSongToLibrary, normalizeSong, openDropdown, API_URL} = usePlayer();
     const navigate = useNavigate();
     useEffect(() => {
     async function fetchArtist() {
         const res = await axios.get(
-                `http://localhost:3001/api/music/artists/${id}`
+                `${API_URL}/api/music/artists/${id}`
             );
             
             setCurrentArtist(res.data)

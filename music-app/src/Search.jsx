@@ -26,7 +26,7 @@ function Search({ getAlbum, streamUrl}){
     const [searchParams] = useSearchParams();
     const query = searchParams.get("q")
     const filterParam = searchParams.get("filter")
-
+    const {API_URL} = usePlayer();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -42,7 +42,7 @@ function Search({ getAlbum, streamUrl}){
     async function getArtist(browseId){
           try{
               const response = await axios.get(
-                  `http://localhost:3001/api/music/artists/${browseId}`
+                  `${API_URL}/api/music/artists/${browseId}`
               )
               setCurrentArtist(response.data);
               navigate(`/artist/${browseId}`);
@@ -59,7 +59,7 @@ function Search({ getAlbum, streamUrl}){
         
         try{
             const response = await axios.get(
-            `http://localhost:3001/api/music/albums/${browseId}`
+            `${API_URL}/api/music/albums/${browseId}`
 
         ) 
             setCurrentAlbum(response.data);
@@ -90,7 +90,7 @@ function Search({ getAlbum, streamUrl}){
         try{
             setLoading(true)
             const response = await axios.get(
-            `http://localhost:3001/api/music/search?q=${query}&filter=${filter}`
+            `${API_URL}/api/music/search?q=${query}&filter=${filter}`
 
         );
 
