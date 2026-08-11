@@ -30,7 +30,9 @@ mongoose.connection.on('error', (err) => {
     console.log('MongoDB Error:', err);
 });
 
-
+app.get("/", (req, res) =>{
+    res.send("server is running")
+})
 app.post('/login', async (req, res) => {
     const {email, password} = req.body;
     try{
