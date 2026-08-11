@@ -16,7 +16,7 @@ function resolveStreamUrl(videoId) {
                 cache.delete(videoId)
 
         const url = `https://www.youtube.com/watch?v=${videoId}`;
-        const cmd = `/opt/homebrew/bin/yt-dlp -f ba -g "${url}"`;
+        const cmd = `yt-dlp -f ba -g "${url}"`;
         exec(
             cmd,
             (err, stdout, stderr) => {
