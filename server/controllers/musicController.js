@@ -20,8 +20,7 @@ async function searchSongs(req, res) {
     }
 }
 
-async function streamSongs(req, res){
-
+async function streamSongs(req, res) {
     try {
         const { id } = req.query;
 
@@ -32,7 +31,7 @@ async function streamSongs(req, res){
             });
         }
 
-        const streamUrl = await resolveStreamUrl(id);
+        const streamUrl = await veromeService.streamSongs(id);
 
         return res.json({
             success: true,
@@ -49,7 +48,7 @@ async function streamSongs(req, res){
             error: err.message
         });
     }
-};
+}
 
 async function getAlbum(req, res){
 
