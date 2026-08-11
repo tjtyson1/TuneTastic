@@ -1,4 +1,5 @@
 const { execFile } = require("child_process");
+const path = require("path");
 
 const cache = new Map();
 
@@ -16,9 +17,9 @@ function resolveStreamUrl(videoId) {
                 cache.delete(videoId)
 
         const url = `https://www.youtube.com/watch?v=${videoId}`;
-        const cmd = `yt-dlp -f ba -g "${url}"`;
+       const cmd = path.join(process.cwd(), "yt-dlp");
         execFile(
-            cmd,
+            cmd,["-f", "ba", "-g", url],
             (err, stdout, stderr) => {
 
                 if (err) {
