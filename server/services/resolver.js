@@ -1,4 +1,4 @@
-const { exec } = require("child_process");
+const { execFile } = require("child_process");
 
 const cache = new Map();
 
@@ -17,7 +17,7 @@ function resolveStreamUrl(videoId) {
 
         const url = `https://www.youtube.com/watch?v=${videoId}`;
         const cmd = `yt-dlp -f ba -g "${url}"`;
-        exec(
+        execFile(
             cmd,
             (err, stdout, stderr) => {
 
