@@ -19,7 +19,13 @@ function resolveStreamUrl(videoId) {
         const url = `https://www.youtube.com/watch?v=${videoId}`;
        const cmd = path.join(process.cwd(), "yt-dlp");
         execFile(
-            cmd,["-f", "ba", "-g", url],
+            cmd,["--js-runtimes", "deno", "-f", "ba", "-g", url],
+            {
+                env: {
+                    ...process.env,
+                    PATH: `${process.env.HOME}/.deno/bin:${process.env.PATH}`
+                }
+            },
             (err, stdout, stderr) => {
 
                 if (err) {
