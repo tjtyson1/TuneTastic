@@ -22,41 +22,65 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
 
     const navigate = useNavigate()
     //Load new song
-    useEffect(() =>{
-        const audio = audioRef.current;
-       
-        if (!currentUser) {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.removeAttribute("src");
-        audio.load();
-        }
-       
-            
-           if (!audio || !streamUrl) return;
-           
-                audio.pause();
-                audio.src = streamUrl;
-                audio.load();
-               
-                setCurrentTime(0);
-                setDuration(0);
+   useEffect(() => {
+    const audio = audioRef.current;
 
-                const playPromise = audio.play()
-                
-                if (playPromise !== undefined){
-                    playPromise.catch(err => {
-                        console.error("Playback failed;", err);
-                    });
-                }
-                
-                const onLoaded = () => setDuration(audio.duration);
-                audio.addEventListener("loadedmetadata", onLoaded)
-               
-                return() => {
-                    audio.removeEventListener("loadedmetadata", onLoaded)   
-                };
-    }, [streamUrl]);
+    if (!audio) {
+        console.log("No audio element");
+        return;
+    }
+
+    if (!streamUrl) {
+        console.log("No stream URL");
+        return;
+    }
+
+    console.log("Setting audio source:", streamUrl);
+
+    audio.pause();
+    audio.src = streamUrl;
+    audio.load();
+
+    console.log("Audio src:", audio.src);
+    console.log("Can play audio:", audio.canPlayType("audio/webm"));
+    console.log("Can play mp4:", audio.canPlayType("audio/mp4"));
+    console.log("Can play mp3:", audio.canPlayType("audio/mpeg"));
+
+    setCurrentTime(0);
+    setDuration(0);
+
+    const onLoaded = () => {
+        console.log("Audio metadata loaded");
+        console.log("Duration:", audio.duration);
+        setDuration(audio.duration);
+    };
+
+    const onError = () => {
+        console.error("Audio element error:", audio.error);
+
+        if (audio.error) {
+            console.error("Error code:", audio.error.code);
+            console.error("Error message:", audio.error.message);
+        }
+    };
+
+    audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("error", onError);
+
+    audio.play()
+        .then(() => {
+            console.log("Playback started");
+        })
+        .catch(err => {
+            console.error("Playback failed:", err);
+        });
+
+    return () => {
+        audio.removeEventListener("loadedmetadata", onLoaded);
+        audio.removeEventListener("error", onError);
+    };
+
+}, [streamUrl]);
 
     useEffect(() =>{
         const audio = audioRef.current;

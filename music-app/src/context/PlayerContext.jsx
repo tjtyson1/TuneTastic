@@ -129,66 +129,77 @@ useEffect(() => {
         
     }
 
-     async function playSong(song, songList = [], restore = false){
-        
+
+    async function playSong(song, songList = [], restore = false) {
+
         if (currentSong?.videoId !== song.videoId) {
             setCurrentTime(0);
         }
 
-         if (!restore && currentSong?.videoId !== song.videoId) {
-            setCurrentTime(0);
+        setCurrentSong(song);
+
+        let nextSong = null;
+        let index = -1;
+
+        if (songList.length > 0) {
+            index = songList.findIndex(
+                s => s.videoId === song.videoId
+            );
+
+            setQueue(songList);
+            setCurrentIndex(index);
+
+            nextSong = songList[index + 1] || null;
         }
 
+        try {
+            const response = await axios.get(
+                `${API_URL}/api/music/stream?id=${song.videoId}`
+            );
+
+            console.log("STREAM RESPONSE:", response.data);
+
+            const streamData = response.data;
+
+            if (
+                !streamData.streamingUrls ||
+                streamData.streamingUrls.length === 0
+            ) {
+                throw new Error("No stream available");
+            }
+
+            const invidiousData = streamData.streamingUrls[0].url;
+
+            if (
+                !invidiousData.streamingUrls ||
+                invidiousData.streamingUrls.length === 0
+            ) {
+                throw new Error("No audio streams available");
+            }
+
+        // Prefer audio/mp4 (itag 140)
+        const audioStream =
+            invidiousData.streamingUrls.find(
+                stream => stream.itag === "140"
+            ) ||
+            invidiousData.streamingUrls.find(
+                stream => stream.type?.startsWith("audio/mp4")
+            ) ||
+            invidiousData.streamingUrls[0];
+
+        const streamUrl = audioStream.url;
+
+        console.log("ACTUAL STREAM URL:", streamUrl);
+
+        setStreamUrl(streamUrl);
+
+    } catch (error) {
+        console.error("Unable to load stream:", error);
+        alert("Unable to find song, try again.");
+    }
+}
 
 
-              setCurrentSong(song);
-              console.log(currentSong)
-              
-              let nextSong = null
-  
-              let index = -1
-              if (songList.length >0){
-  
-                  index = songList.findIndex(s => s.videoId ===song.videoId)
-                  setQueue(songList);
-                  console.log(queue)
-                  setCurrentIndex(index);
-                nextSong = songList[index + 1] || null
-                  console.log(nextSong)
-              }
-              
-          try{
-              const response = await axios.get(
-                  `${API_URL}/api/music/stream?id=${song.videoId}`
-              ); 
-       
-              console.log(response)
-              const urls = response.data.streamingUrls
-  
-              if (!urls || urls.length ===0 ){
-                 throw new Error("No stream available");
-                  
-                  return;
-              }
-          
-         
-          console.log(urls[0].url)
-          
-  
-          setStreamUrl(urls[0].url);
-  
-          if (nextSong){axios.get(`/api/music/stream?id=${nextSong.videoId}`);}
-          } catch (error){
-  
-              console.error("Unable to load stream", error);
-  
-              alert("Unable to find song, try again.")
-          }
-          
-  
-          
-  
-          } 
 
 
      function nextSong(){
