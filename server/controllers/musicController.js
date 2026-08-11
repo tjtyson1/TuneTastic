@@ -31,7 +31,7 @@ async function streamSongs(req, res) {
             });
         }
 
-        const streamUrl = await veromeService.getStream(id);
+        const streamUrl = await veromeService.streamSongs(id);
 
         return res.json({
             success: true,
