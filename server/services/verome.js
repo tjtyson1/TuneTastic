@@ -1,6 +1,6 @@
 const axios = require('axios');
-
-const VEROME_URL = 'http://localhost:8000'
+require("dotenv").config(); 
+const VEROME_URL = process.env.VEROME_URL
 
 async function searchSongs(query, queryType){
     const response = await axios.get(

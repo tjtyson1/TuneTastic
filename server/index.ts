@@ -8,11 +8,19 @@ const app = express()
 const musicRoutes = require("./routes/musicRoutes");
 const libraryRoutes = require("./routes/LibraryRoutes");
 
+require("dotenv").config(); 
 app.use(express.json())
 app.use(cors())
 app.use("/api/music", musicRoutes);
 app.use("/api/library", libraryRoutes);
-mongoose.connect("mongodb://127.0.0.1:27017/user")
+
+// mongoose.connect("mongodb://127.0.0.1:27017/user")
+mongoose.connect(process.env.MONGODB_URI)
+.then( () => {
+    console.log("Connected to MongoDB!!")
+}).catch((err) => {
+        console.error("MongoDB Error:", err);
+    });
 
 mongoose.connection.on('connected', () => {
     console.log('Connected to MongoDB');

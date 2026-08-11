@@ -44,7 +44,7 @@ export default function SearchPageResults({currentView, result = [], filter,}){
                                       
                                       <h2 className=" text-left font-semibold line-clamp-2 mt-2 w-30 text-l text-gray-800 dark:text-gray-200">{song.title}</h2>
 
-                                      <p className="text-left h-6 text-gray-600 hover:underline text-l  dark:text-gray-200 dark:text-gray-400 "
+                                      <p className="text-left h-6 text-gray-600 hover:underline text-l truncate  dark:text-gray-200 dark:text-gray-400 "
                                         onClick={(e) => {navigate(song?.artists?.[0].id? `/artist/${song?.artists?.[0].id}` : `search?q=${song?.artists?.[0].name}&filter=artists`)}}>
                                         {song.artists.map(artist => artist.name).join(", ")}</p>
                                     <div className="flex justify-end  p-2 w-30 h-10 ">

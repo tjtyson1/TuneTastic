@@ -145,7 +145,7 @@ function AudioPlayer({songCover, songTitle, artists, streamUrl}){
            loading="lazy"
             src={upscaleImage(songCover, 60)} 
            alt="" 
-           onError={(e) =>{e.target.onerror = null; e.target.src = "/assets/albumPlaceHolder.png"}}/>
+           onError={(e) =>{}}/>
 
             <div className="pl-2 w-1/3">
                 <p className="text-sm line-clamp-2" title={songTitle}>{songTitle || "No song selected"}</p>

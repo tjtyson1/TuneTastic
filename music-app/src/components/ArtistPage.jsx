@@ -74,7 +74,7 @@ export default function ArtistPage({}){
                                 loading="lazy"
                                 className="rounded-full border-gray-200 dark:border-gray-700 border m-auto w-150.5 h-150.5 object-cover"
                                 src={upscaleImage(currentArtist?.artist?.thumbnail, 600)} alt=""
-                                onError={(e) =>{e.target.onerror =null; e.target.src = albumPlaceHolder}} />
+                                onError={(e) =>{}} />
 
                                 <div className="place-content-end ">
                                     <p className="capitalize text-gray-600 dark:text-gray-400">Artist</p>
@@ -107,7 +107,7 @@ export default function ArtistPage({}){
                                             loading="lazy"
                                             src={upscaleImage(song?.thumbnail, 226)} alt=""
                                             className="rounded-lg justify-center m-auto w-52 h-52 object-cover"
-                                            onError={(e) =>{e.target.onerror =null; e.target.src = albumPlaceHolder}} />
+                                            onError={(e) =>{}} />
                                             <span className="block wrap-normal text-left font-semibold h-6 line-clamp-2 mt-2">
                                                 {song.title}
                                             </span>
@@ -164,7 +164,7 @@ export default function ArtistPage({}){
                                             loading="lazy"
                                             src={upscaleImage(album?.thumbnail, 226)} alt=""
                                             className="rounded-lg justify-center m-auto w-52 h-52 object-cover" 
-                                            onError={(e) =>{e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
+                                            onError={(e) =>{}}/>
                                             <h3 className="text-left font-semibold line-clamp-2 mt-2 h-6">
                                                 {album?.title}
                                             </h3>
@@ -191,7 +191,7 @@ export default function ArtistPage({}){
                                             loading="lazy"
                                             src={upscaleImage(single?.thumbnail, 226)} alt=""
                                             className="rounded-lg justify-center m-auto w-52 h-52 object-cover" 
-                                            onError={(e) =>{e.target.onerror =null; e.target.src = albumPlaceHolder}}/>
+                                            onError={(e) =>{}}/>
                                             <h3 className="text-left font-semibold line-clamp-2 mt-2 h-6">
                                                 {single?.title}
                                             </h3>
