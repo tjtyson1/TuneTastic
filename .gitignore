@@ -1,2 +1,6 @@
 server/.env
 music-app/.env
+music-app/.env.development
+music-app/.env.production
+server/.env.production
+server/.env.development

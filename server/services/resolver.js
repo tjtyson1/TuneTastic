@@ -10,6 +10,9 @@ const YT_DLP_PATH =
     process.env.YT_DLP_PATH ||
     (fs.existsSync(localExecutable) ? localExecutable : "yt-dlp");
 
+console.log("yt-dlp executable:", YT_DLP_PATH);
+console.log("Executable exists:", fs.existsSync(YT_DLP_PATH));
+
 function resolveStreamUrl(videoId) {
     if (!/^[A-Za-z0-9_-]{11}$/.test(videoId || "")) {
         return Promise.reject(new Error("Invalid YouTube video id"));
