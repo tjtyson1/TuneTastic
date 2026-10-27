@@ -9,7 +9,7 @@ const localExecutable = path.join(process.cwd(), "bin", "yt-dlp");
 const YT_DLP_PATH =
     process.env.YT_DLP_PATH ||
     (fs.existsSync(localExecutable) ? localExecutable : "yt-dlp");
-
+    
 console.log("Current directory:", process.cwd());
 console.log("Expected executable:", localExecutable);
 console.log("YT_DLP_PATH environment:", process.env.YT_DLP_PATH);
