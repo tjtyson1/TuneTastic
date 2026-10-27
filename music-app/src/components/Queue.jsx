@@ -13,10 +13,10 @@ import HistorySongs from "./HistorySongs.jsx";
    
     const upcoming = queue.slice(currentIndex + 1)
    
-     const queueRef = useRef(null);
+     const queueRef = useRef(null); 
      const upNextRef = useRef(null)
 
-   console.log("queue")
+   
 
        useEffect(() => {
         if(queueRef.current){
@@ -35,7 +35,7 @@ import HistorySongs from "./HistorySongs.jsx";
     return(
         <div 
         ref={queueRef}
-        className={`  fixed top-0 right-1 w-1/4 transition-all delay-150 ease-in-out ${isVisible? " translate-x-0" : " translate-x-full"}
+        className={`  fixed top-0 right-1 w-1/4 transition-all duration-300 ease-in-out ${isVisible? " translate-x-0 opacity-100 " : " translate-x-full opacity-0"}
          h-90/100 mt-20 bg-gray-200/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-200  justify-self-end overflow-y-auto rounded-lg scrollbar-none   `}>
            
                 <section >

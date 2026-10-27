@@ -16,7 +16,8 @@ import PlaylistPage from './components/PlaylistPage.jsx'
 import { usePlayer } from './context/PlayerContext.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Notification from './components/Notification.jsx'
-
+import NavbarDrop from './components/NavBarDrop.jsx'
+import MobAudioPlayer from './components/MobAudioPlayer.jsx'
 import albumPlaceHolder from "./assets/albumPlaceHolder.png"
 
 import axios from "axios";
@@ -107,7 +108,8 @@ function App() {
    <Queue/>
 
    <Dropdown/>
-
+    <NavbarDrop/>
+    <MobAudioPlayer/>
    <AudioPlayer 
       streamUrl={streamUrl}
       songTitle={currentSong?.title}
@@ -116,7 +118,7 @@ function App() {
       nextSong={nextSong}
       previousSong={previousSong}
     />
-
+  
    
     </>
 

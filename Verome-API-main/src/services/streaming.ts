@@ -26,7 +26,7 @@ async function getDynamicInstances() {
   }
 
   try {
-    const response = await fetch("https://raw.githubusercontent.com/n-ce/Uma/main/dynamic_instances.json");
+    const response = await fetch("https://raw.githubusercontent.com/n-ce/Uma/main/dynamic_instances.json", {signal: AbortSignal.timeout(5000)}); if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     data.piped = PIPED_INSTANCES;
     instancesCache = data;
@@ -35,7 +35,7 @@ async function getDynamicInstances() {
   } catch {
     return {
       piped: PIPED_INSTANCES,
-      invidious: ["https://yt.omada.cafe", "https://y.com.sb", "https://inv.nadeko.net"],
+      invidious: ["https://y.com.sb", "https://inv.nadeko.net"],
     };
   }
 }
@@ -48,7 +48,9 @@ export async function fetchFromPiped(videoId: string) {
     try {
       const response = await fetch(`${instance}/streams/${videoId}`, {
         headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        signal: AbortSignal.timeout(5000),
       });
+       if (!response.ok) continue;
       const data = await response.json();
 
       if (data?.error) continue;
@@ -78,7 +80,8 @@ export async function fetchFromPiped(videoId: string) {
           hlsUrl: data.hls,
         };
       }
-    } catch {
+    } catch(err) {
+       console.error(`Piped failed: ${instance}`, err);
       continue;
     }
   }
@@ -92,13 +95,16 @@ export async function fetchFromInvidious(videoId: string) {
 
   for (const instance of invidiousInstances) {
     try {
-      const response = await fetch(`${instance}/api/v1/videos/${videoId}`);
+      const response = await fetch(`${instance}/api/v1/videos/${videoId}`, {signal: AbortSignal.timeout(5000)});
+      if (!response.ok) continue;
       const data = await response.json();
 
-      if (data) {
+      if (data && !data.error) {
         const audioFormats = (data.adaptiveFormats || []).filter((f: any) =>
           f.type?.includes("audio") || f.mimeType?.includes("audio")
         );
+
+        if (audioFormats.length === 0) continue;
 
         return {
           success: true,
@@ -121,7 +127,8 @@ export async function fetchFromInvidious(videoId: string) {
           },
         };
       }
-    } catch {
+    } catch(err) {
+       console.error(`Invidious failed: ${instance}`, err);
       continue;
     }
   }

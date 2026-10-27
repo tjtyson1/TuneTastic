@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import albumPlaceHolder from "../assets/albumPlaceHolder.png";
 import Search from "../Search";
 import { usePlayer } from "../context/PlayerContext";
-
+import { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
@@ -20,8 +20,10 @@ export default function SearchPageResults({currentView, result = [], filter,}){
     const {upscaleImage} = usePlayer()
     const navigate = useNavigate()
 
-
-    console.log(result)
+    useEffect(() => {
+                console.log("result:", result);
+                }, [result])
+    
     return(
         <div className="bg-gray-300 min-h-screen dark:bg-gray-900">
             {/* all results */}
@@ -32,7 +34,7 @@ export default function SearchPageResults({currentView, result = [], filter,}){
             }
                     {/* Song search*/}
                       { filter=="songs" &&
-                          <div className=" grid xl:grid-cols-5 lg:grid-cols-3  md:grid-cols-2 px-4 py-2 gap-4 pb-24 "> 
+                          <div className=" flex flex-wrap  justify-center items-center px-4 py-2 gap-5 pb-24 "> 
                               {result.slice(0,20).map((song) => (
                                   <div 
                                     key={song.videoId} onClick={() => {playSong(normalizeSong(song), result)}} 

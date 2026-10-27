@@ -16,7 +16,6 @@ function Library(){
     const navigate = useNavigate() 
     
    
-    console.log("queue: ", queue)
     useEffect(() => {
         loadLibrary();
     }, []);

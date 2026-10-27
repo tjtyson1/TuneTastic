@@ -11,8 +11,7 @@
     "strict": true
   },
   "deploy": {
-    "org": "tjtyson1",
-    "app": "verome"
+    "org": "kirazul",
+    "app": "verome-api"
   }
 }
-

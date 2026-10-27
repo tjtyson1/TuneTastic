@@ -1,8 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useNavigate } from "react-router-dom"
-
+import { usePlayer } from "./context/PlayerContext"
 export default function Home(){
+    const {currentUser} = usePlayer();
     const navigate = useNavigate()
+    if (!currentUser){
     return(
         <div className="bg-gray-300 dark:bg-gray-900 h-screen flex items-center justify-center   ">
             <div className=" ">
@@ -44,5 +46,26 @@ export default function Home(){
 
         </div>
     )
+} else{
+    return(
+        <div className="bg-gray-300 dark:bg-gray-900 h-screen flex items-center justify-center   ">
+            <div className=" ">
+
+                <div className="flex text-4xl font-bold p-10 items-center justify-center ">
+                <h1 className="text-center dark:text-gray-200">Welcome!</h1> 
+                </div>
+
+                
+
+               
+
+            </div>
+            
+
+           
+
+
+        </div>)
+}
 
 }

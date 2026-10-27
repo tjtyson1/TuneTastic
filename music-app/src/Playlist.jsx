@@ -15,14 +15,14 @@ export default function Playlist(){
         }, []);
 
     return(
-        <div className="bg-gray-300 dark:bg-gray-900 text-gray-900 dark:text-gray-200 h-screen pt-20 ">
+        <div className="bg-gray-300 dark:bg-gray-900 text-gray-900 dark:text-gray-200 min-h-screen pt-20 pb-24 ">
            <h1 className="flex text-3xl justify-center p-10 font-bold text-gray-900 dark:text-gray-200">Playlists</h1>
             
             <div>
                 <div className="flex justify-center px-4 py-2 gap-5 overflow-x-auto scrollbar-none  ">
                     
                 </div>
-                <div className=" flex flex-row flex-wrap flex-wrap gap-5">
+                <div className=" flex flex-gap-5 flex-wrap  justify-center items-center">
                     <div className="grid p-2 justify-center m-0 w-56 h-54 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800">
                         
                         <button className=" bg-gray-300 rounded-lg w-30 h-30 justify-self-center mb-4">

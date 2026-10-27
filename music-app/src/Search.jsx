@@ -105,7 +105,7 @@ function Search({ getAlbum, streamUrl}){
     }
     return(
         
-        <div className="bg-gray-300 dark:bg-gray-900 dark:text-gray-200  min-h-screen pt-20 ">
+        <div className="bg-gray-300 dark:bg-gray-900 dark:text-gray-200  min-h-screen py-20 ">
             {/* search bar */}
             <div className="flex justify-around items-center ">
                 <form onSubmit={handleSearch}className="relative">

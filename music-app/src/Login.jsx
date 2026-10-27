@@ -19,6 +19,7 @@ function Login(){
                 
                 localStorage.setItem("user", JSON.stringify(result.data.user));
                 setCurrentUser(result.data.user)
+                
 
                 navigate('/search')
                 

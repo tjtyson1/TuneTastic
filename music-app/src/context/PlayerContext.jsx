@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect} from "react";
+import { createContext, useContext, useState, useEffect, useRef} from "react";
 import axios from "axios";
 import albumPlaceHolder from "../assets/albumPlaceHolder.png";
+
 
 
 const PlayerContext = createContext();
@@ -16,6 +17,8 @@ export function PlayerProvider({children}){
     const [isVisible, setVisible] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false);
     const [openMenu, setOpenMenu] = useState(null);
+    const [shouldAutoPlay, setShouldAutoPlay] = useState(false)
+    const [showMobAudio, setShowMobAudio] = useState(false)
     const [library, setLibrary] = useState({
             likedSongs: [],
             likedAlbums: [],
@@ -23,6 +26,14 @@ export function PlayerProvider({children}){
             recentlyPlayed: [],
         }) 
     const [playlistName, setPlaylistName] = useState("")
+       const [navBarClicked, setNavBarClicked] = useState(false)
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0)     
+    const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(1);
+
+    const audioRef = useRef(null);
+    
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,14 +45,16 @@ export function PlayerProvider({children}){
 
     const [loadedPlayer ,setLoadedPlayer] = useState(false)
 
-    const [currentTime, setCurrentTime] = useState(0)
+    
     
     const [currentUser, setCurrentUser] = useState(() => {
         const savedUser = localStorage.getItem("user");
         return savedUser ? JSON.parse(localStorage.getItem("user")) : null;
     });
-    
-    console.log(currentSong)
+ 
+    useEffect(() => {
+    console.log("Song changed:", currentSong);
+}, [currentSong]);
     
     useEffect(() => {
     if (currentSong) {
@@ -51,7 +64,7 @@ export function PlayerProvider({children}){
         );
     }
 }, [currentSong]);
-
+    
     useEffect(() =>{
         if (!loadedPlayer) return
         localStorage.setItem("history", JSON.stringify(history))
@@ -131,7 +144,7 @@ useEffect(() => {
 
 
     async function playSong(song, songList = [], restore = false) {
-
+        setShouldAutoPlay(!restore);
         if (currentSong?.videoId !== song.videoId) {
             setCurrentTime(0);
         }
@@ -558,7 +571,30 @@ useEffect(() => {
                 videoId: song.videoId,
         };
     }
-        
+        function logOut(){
+            localStorage.clear()
+
+            setLibrary({
+                likedSongs: [],
+                likedAlbums: [],
+                playlists: [],
+                recentlyPlayed: []
+                });
+            setCurrentUser(null)
+            setCurrentSong(null);
+            setQueue([]);
+            setCurrentAlbum(null);
+            setCurrentArtist(null);
+            setCurrentPlaylist([]);
+            setStreamUrl(null);
+
+             const audio = document.querySelector("audio");
+
+    if(audio){
+        audio.pause();
+        audio.currentTime = 0;
+    }
+        }
         
     
     
@@ -608,7 +644,20 @@ useEffect(() => {
                     showNotification, setShowNotification,
                     currentTime,setCurrentTime,
                     addSongToQueue, openDropdown,
-                    normalizeSong,API_URL
+                    normalizeSong,API_URL,
+                    setNavBarClicked,
+                    navBarClicked,
+                    logOut,
+                    shouldAutoPlay,
+                    showMobAudio,
+                    setShowMobAudio,
+                    audioRef,
+                    duration,
+                    setDuration,
+                    isPlaying,
+                    setIsPlaying,
+                    volume,
+                    setVolume
                     
 
                 }}

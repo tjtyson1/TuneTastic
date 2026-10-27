@@ -7,4 +7,14 @@
     --color-primary-dark: #193261;
     --color-secondary-dark: #8E0045;
 }
+body {
+    background-color: #d1d5db;
+}
 
+.dark body {
+    background-color: #111827;
+}
+
+html, body {
+    overscroll-behavior-y: none;
+}

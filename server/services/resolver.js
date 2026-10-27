@@ -1,73 +1,39 @@
-const { execFile } = require("child_process");
-const path = require("path");
-
+const { execFile } = require("node:child_process");
 const cache = new Map();
+const pending = new Map();
 
 function resolveStreamUrl(videoId) {
-    return new Promise((resolve, reject) => {
-
-        const cached = cache.get(videoId);
-
-        if (cached && cached.expires > Date.now()) {
-            return resolve(cached.url);
-        }
-
-        if (cached) {
-            cache.delete(videoId);
-        }
-
-        const url = `https://www.youtube.com/watch?v=${videoId}`;
-
-        const ytDlp = path.join(process.cwd(), "yt-dlp");
-
-        execFile(
-            ytDlp,
-            [
-                "--js-runtimes",
-                "deno",
-                "-f",
-                "ba",
-                "-g",
-                url
-            ],
-            {
-                env: {
-                    ...process.env,
-                    PATH: `${process.env.HOME}/.deno/bin:${process.env.PATH}`
-                }
-            },
-            (err, stdout, stderr) => {
-
-                if (err) {
-                    console.error("yt-dlp error:");
-                    console.error(stderr || err.message);
-
-                    return reject(
-                        new Error("Failed to get stream")
-                    );
-                }
-
-                const streamUrl = stdout.trim();
-
-                console.log("Stream URL:", streamUrl);
-
-                if (!streamUrl) {
-                    return reject(
-                        new Error("No stream URL returned")
-                    );
-                }
-
-                cache.set(videoId, {
-                    url: streamUrl,
-                    expires: Date.now() + 10 * 60 * 1000
-                });
-
-                resolve(streamUrl);
+    if (!/^[A-Za-z0-9_-]{11}$/.test(videoId || "")) {
+        return Promise.reject(new Error("Invalid YouTube video id"));
+    }
+    const cached = cache.get(videoId);
+    if (cached && cached.expires > Date.now()) return Promise.resolve(cached.url);
+    cache.delete(videoId);
+    if (pending.has(videoId)) return pending.get(videoId);
+    const request = new Promise((resolve, reject) => {
+        execFile(process.env.YT_DLP_PATH || "yt-dlp", [
+            "--ignore-config", "--no-playlist", "--no-warnings",
+            "--socket-timeout", "10", "--retries", "1",
+            "--extractor-retries", "1", "--no-cache-dir",
+            "-f", "bestaudio[ext=m4a]/bestaudio", "--get-url",
+            `https://www.youtube.com/watch?v=${videoId}`
+        ], { timeout: 45000, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+            if (err) {
+                console.error("yt-dlp extraction failed:", stderr || err.message);
+                return reject(new Error(err.code === "ENOENT"
+                    ? "yt-dlp executable not found; set YT_DLP_PATH"
+                    : "yt-dlp could not resolve audio; check the server terminal"));
             }
-        );
+            const url = stdout.trim().split(/\r?\n/)[0];
+            try {
+                if (new URL(url).protocol !== "https:") throw new Error();
+            } catch { return reject(new Error("yt-dlp returned no valid audio URL")); }
+            cache.set(videoId, { url, expires: Date.now() + 5 * 60 * 1000 });
+            resolve(url);
+        });
     });
+    pending.set(videoId, request);
+    request.finally(() => pending.delete(videoId)).catch(() => {});
+    return request;
 }
-
-module.exports = {
-    resolveStreamUrl
-};
+module.exports = { resolveStreamUrl };

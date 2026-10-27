@@ -6,7 +6,7 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 
 import albumPlaceHolder from "../assets/albumPlaceHolder.png";
 import axios from "axios";
-import { useEffect, useState } from "react"
+import { useEffect, useState, } from "react"
 import { usePlayer } from "../context/PlayerContext"
 import { useNavigate } from "react-router-dom"
 import { useParams } from "react-router-dom";
@@ -19,7 +19,9 @@ export default function PlaylistPage(){
     
         const { playSong, upscaleImage, shuffle, currentUser, removeSongFromPlaylist, library, API_URL } = usePlayer();
        
-       
+        useEffect(() => {
+                console.log("current playlist:", currentPlaylist);
+                }, [currentPlaylist])
         const navigate = useNavigate();
 
          useEffect(() => {
@@ -62,7 +64,7 @@ export default function PlaylistPage(){
             <h1 className="flex text-3xl justify-center p-10 font-bold">{currentPlaylist.name} </h1>
            
             <div>
-                {console.log(currentPlaylist)}
+                
              <Songlist
                         playSong={playSong}
                         removeSong={(videoId) => removeSongFromPlaylist(currentPlaylist._id, videoId)}
